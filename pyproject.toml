@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scout-skill-forge"
+name = "scout-compass"
 version = "0.6.0"
 description = "Author Microsoft Scout SKILL.md files tuned to senior Microsoft executives."
 readme = "README.md"
@@ -18,11 +18,11 @@ web = ["flask>=3.0"]
 dev = ["pytest>=7.4"]
 
 [project.scripts]
-skill-forge = "skill_forge:cli_main"
+scout-compass = "compass:cli_main"
 
-# skill_forge.py and automations.py live in cli/; expose them as top-level modules.
+# compass.py and automations.py live in cli/; expose them as top-level modules.
 [tool.setuptools]
-py-modules = ["skill_forge", "automations"]
+py-modules = ["compass", "automations"]
 
 [tool.setuptools.package-dir]
 "" = "cli"

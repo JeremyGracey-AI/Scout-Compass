@@ -1,7 +1,7 @@
-"""Flask web UI for Scout Skill Forge.
+"""Flask web UI for Scout Compass.
 
 Run:
-    cd scout-skill-forge
+    cd scout-compass
     pip install flask pyyaml jinja2
     python web/app.py
     # open http://127.0.0.1:5000
@@ -45,7 +45,7 @@ _load_env_file(Path(__file__).resolve().parent / ".env")
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
 
-from skill_forge import (  # noqa: E402
+from compass import (  # noqa: E402
     PERSONAS_DIR,
     WORKFLOWS,
     load_persona,

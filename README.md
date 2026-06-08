@@ -1,12 +1,14 @@
-# Scout Skill Forge
+# Scout Compass
+
+> Navigate from idea to installed skill with a smooth build, preview, and install flow.
 
 A toolkit for authoring **Microsoft Scout** `SKILL.md` files tuned to senior Microsoft executives.
 
 It ships three ways to create skills:
 
-1. **Python CLI** (`cli/skill_forge.py`) — interactive or scriptable; writes directly into `~/.copilot/skills/`.
+1. **Python CLI** (`cli/compass.py`) — interactive or scriptable; writes directly into `~/.copilot/skills/`.
 2. **Web app** (`web/app.py`) — a persona-builder UI for non-technical users: fill a form (no YAML), preview the skills + automations, then one-click install into the Scout skills folder (or download a `.zip`). See [Web app](#web-app).
-3. **Meta-skill** (`meta_skill/skill-forge/SKILL.md`) — drop this into Scout itself so Scout can author new exec skills on demand.
+3. **Meta-skill** (`meta_skill/compass/SKILL.md`) — drop this into Scout itself so Scout can author new exec skills on demand.
 
 All three share the same four executive workflow archetypes:
 
@@ -29,14 +31,14 @@ Add more personas by dropping new YAML files into `personas/` matching the same 
 pip install pyyaml jinja2 flask
 
 # CLI — generate all four skills for Morgan
-python cli/skill_forge.py \
+python cli/compass.py \
   --persona personas/morgan_reyes.yaml \
   --workflows briefing,comms,triage,strategy \
   --out ~/.copilot/skills \
   --prefix morgan
 
 # CLI — interactive mode
-python cli/skill_forge.py
+python cli/compass.py
 
 # Web UI
 python web/app.py
@@ -58,7 +60,7 @@ No restart needed — Scout picks them up at the start of the next conversation.
 ## Installing the meta-skill
 
 ```bash
-cp -r meta_skill/skill-forge ~/.copilot/skills/
+cp -r meta_skill/compass ~/.copilot/skills/
 ```
 
 Then ask Scout: *"Make a new comms skill for Morgan Reyes — he needs help drafting board-up updates on the partner lifecycle KPIs."* The meta-skill walks Scout through gathering the right persona context and producing a validated SKILL.md.
@@ -66,14 +68,14 @@ Then ask Scout: *"Make a new comms skill for Morgan Reyes — he needs help draf
 ## Repo layout
 
 ```
-scout-skill-forge/
+scout-compass/
 ├── cli/
-│   └── skill_forge.py          # generator + validator + interactive CLI
+│   └── compass.py              # generator + validator + interactive CLI
 ├── web/
 │   ├── app.py                  # Flask app
 │   └── templates/index.html    # single-page UI
 ├── meta_skill/
-│   └── skill-forge/
+│   └── compass/
 │       └── SKILL.md            # the skill that teaches Scout to author exec skills
 ├── personas/
 │   └── morgan_reyes.yaml      # seed persona

@@ -20,8 +20,8 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-if TYPE_CHECKING:  # avoid a runtime import cycle with skill_forge
-    from skill_forge import Persona
+if TYPE_CHECKING:  # avoid a runtime import cycle with compass
+    from compass import Persona
 
 SCHEMA_NOTE = (
     "Field names follow Scout's documented automation fields (Name, Prompt, Trigger, "
@@ -160,7 +160,7 @@ def render_automation_yaml(automation: Automation) -> str:
 def render_manifest(automations: list[Automation]) -> str:
     manifest = {
         "version": "0.1",
-        "generated_by": "scout-skill-forge",
+        "generated_by": "scout-compass",
         "note": SCHEMA_NOTE,
         "automations": [automation_to_doc(a) for a in automations],
     }

@@ -1,20 +1,20 @@
-"""skill_forge.py — Microsoft Scout SKILL.md generator for executive personas.
+"""compass.py — Microsoft Scout SKILL.md generator for executive personas.
 
 Generates persona-grounded SKILL.md files for Microsoft Scout
 (~/.copilot/skills/<skill-name>/SKILL.md) tailored to a specific executive.
 
 Usage (interactive):
-    python skill_forge.py
+    python compass.py
 
 Usage (non-interactive):
-    python skill_forge.py \
+    python compass.py \
         --persona personas/morgan_reyes.yaml \
         --workflows briefing,comms,triage,strategy \
         --out ~/.copilot/skills \
         --prefix morgan
 
 Usage (validate only):
-    python skill_forge.py --validate ~/.copilot/skills/morgan-briefing/SKILL.md
+    python compass.py --validate ~/.copilot/skills/morgan-briefing/SKILL.md
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ try:
 except ImportError:
     sys.exit("Missing dependency: pip install pyyaml jinja2")
 
-import automations  # sibling module (cli/); safe — it imports skill_forge only for typing
+import automations  # sibling module (cli/); safe — it imports compass only for typing
 
 
 HERE = Path(__file__).resolve().parent
@@ -488,7 +488,7 @@ def list_personas() -> list[Path]:
 
 
 def interactive_main() -> int:
-    print("Microsoft Scout — Skill Forge")
+    print("Scout Compass")
     print("=" * 50)
 
     personas = list_personas()
