@@ -122,6 +122,9 @@ The generator's validator (`--validate <path>`) enforces these rules.
 2. Fill in: `id`, `display_name`, `title`, `org`, `charter`, `scope.process_domains`, `scope.partner_orgs`, `voice_and_style`, `decision_filters`.
 3. Run the generator. No template changes needed.
 
+Prefer not to touch YAML? Build the executive in the web app and click **Export .yaml** to
+download a ready-to-commit `personas/<id>.yaml` — then drop it in `personas/` and commit.
+
 ## Web app
 
 A browser app aimed at non-technical users — build an executive, preview, and install,
@@ -145,6 +148,9 @@ What it does:
 - **Manage installed skills** — list and remove skills already in that folder.
 - **Zip fallback** — browsers without the File System Access API (Safari, Firefox) get a
   `.zip` to unzip into `~/.copilot/skills/`.
+- **Export persona** — download what you built as a ready-to-commit `personas/<id>.yaml`
+  (the same schema the CLI reads), so a browser-built executive can be seeded into the repo
+  without hand-writing YAML.
 
 ### Accounts & persona library (Phase 2)
 

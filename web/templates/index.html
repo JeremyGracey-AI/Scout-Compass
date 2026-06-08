@@ -161,6 +161,7 @@
       <button class="btn primary" id="previewBtn" type="button">Preview</button>
       <button class="btn good" id="installBtn" type="button">Install to Scout</button>
       <button class="btn" id="zipBtn" type="button">Download .zip</button>
+      <button class="btn" id="yamlBtn" type="button">Export .yaml</button>
     </div>
     <div class="msg" id="leftMsg"></div>
   </div>
@@ -347,6 +348,32 @@
     URL.revokeObjectURL(a.href);
   }
 
+  // ---- export the current persona as a commit-ready personas/<id>.yaml ----
+  async function exportYaml() {
+    hideMsg($("leftMsg"));
+    let body;
+    if (mode === "saved") {
+      const file = $("savedSelect").value;
+      if (!file) { showMsg($("leftMsg"), "Choose a saved persona, or switch to Build a new executive.", "err"); return; }
+      body = { persona: file };
+    } else {
+      let persona;
+      try { persona = buildPersona(); } catch (e) { showMsg($("leftMsg"), e.message, "err"); return; }
+      body = { persona_data: persona };
+    }
+    const res = await fetch("/api/persona-yaml", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); showMsg($("leftMsg"), d.error || "Export failed.", "err"); return; }
+    const blob = await res.blob();
+    const dispo = res.headers.get("Content-Disposition") || "";
+    const name = (dispo.match(/filename="([^"]+)"/) || [])[1] || "persona.yaml";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    URL.revokeObjectURL(a.href);
+    showMsg($("leftMsg"), `Downloaded ${name} — commit it to personas/ to make it a reusable saved persona.`, "ok");
+  }
+
   // ---- manage installed skills ----
   async function listInstalled() {
     if (!dirHandle) { try { await pickSkillsFolder(); } catch { return; } }
@@ -373,6 +400,7 @@
   // ---- wire buttons ----
   $("previewBtn").onclick = generate;
   $("zipBtn").onclick = downloadZip;
+  $("yamlBtn").onclick = exportYaml;
   $("installBtn").onclick = async () => {
     if (!supportsFS) { showMsg($("leftMsg"), "This browser can't install directly — use Download .zip (Chrome or Edge support one-click install).", "info"); return downloadZip(); }
     // Folder picker needs the click's transient activation, so require a Preview first
