@@ -1,0 +1,113 @@
+---
+name: {{ skill_slug }}
+description: |
+  Builds a meeting-ready prep pack for {{ persona.display_name }} ({{ persona.title }}, {{ persona.org }}) — objective, run-of-show, who's in the room, and the decisions to land. Use when {{ persona.first_name }} asks to "prep me for my meeting with," "build an agenda for," "what's the run of show for," "get me ready for," or "what do I need to decide in" a specific meeting. Always names the meeting's owner, the decisions to land, the partner orgs affected, and the one outcome {{ persona.first_name }} must walk away with.
+---
+
+# {{ skill_title }}
+
+You are preparing **{{ persona.display_name }}**, **{{ persona.title }}**, {{ persona.org }}, to walk into a specific meeting ready to lead it.
+
+## When to use this skill
+
+Activate when {{ persona.first_name }} (or someone on his behalf) asks for any of:
+
+- "Prep me for my meeting with \<person / team\>"
+- "Build an agenda for \<meeting\>"
+- "What's the run of show for \<review / sync\>?"
+- "Get me ready for \<meeting\> at \<time\>"
+- "What do I need to decide in \<meeting\>?"
+
+Do NOT use this skill for: a topic or person pre-read with no specific meeting attached (use the briefing skill), drafting the follow-up note (use the comms skill), or recording what was decided after the meeting (use the decisions-log skill).
+
+## What a great meeting prep gives {{ persona.first_name }}
+
+A prep pack exists to make the meeting shorter and the decision cleaner. Every prep must answer:
+
+1. **What is the one outcome {{ persona.first_name }} must leave with?** (a decision, an alignment, an ask granted)
+2. **Whose meeting is it, and what do they want?** Name the owner and each attendee's stake.
+3. **Which process domain and KPI is on the table?** From {{ persona.process_domains | join(", ") }}.
+4. **Which partner orgs are represented or affected?** From {{ persona.partner_orgs | join(", ") }}.
+5. **What decision or approval is queued, and what does {{ persona.first_name }} need to make it?**
+6. **What is the compliance or control angle, if any?** (SOX, Trade, Tax, Privacy, Anticorruption, Payments)
+
+If the meeting has no clear owner or outcome, say so first — the highest-value prep may be to decline it or shorten it.
+
+{% include "_persona_grounding.md.j2" %}
+
+## Required research steps
+
+Work from the calendar event outward. Stop once the run-of-show is decision-ready.
+
+1. **The meeting itself (`m365_*` calendar):** open the event — title, time, attendees, location, attached agenda or deck, and the organizer's invite note.
+2. **Cross-service context (WorkIQ):** sweep "everything on \<this meeting / topic / attendees\> across mail, Teams, and documents since the last related meeting," then drill in with the `m365_*` tools for the specific threads, decks, and prior-meeting notes.
+3. **Who's in the room (people search):** resolve every attendee's title, org, and reporting line; flag the decision-makers and anyone whose sign-off the outcome depends on.
+4. **Open threads (`m365_*` mail + Teams):** pull unresolved asks, action items from the last meeting on this topic, and any commitment {{ persona.first_name }} or a partner org still owes.
+5. **The number (if a KPI is on the table):** pull its current value, target, and trend from the referenced dashboard; link it. Never invent a figure.
+
+Cite each source inline with its name and link.
+
+## Output format — the prep pack
+
+Save to `{{ "{" }}workspace{{ "}" }}/meeting-prep/{{ "{" }}YYYY-MM-DD{{ "}" }}-{{ "{" }}meeting-slug{{ "}" }}.md` and surface inline:
+
+```
+# Meeting prep: <Meeting title> — {{ persona.first_name }}, <date / time>
+
+## The one outcome
+<The single decision, alignment, or ask {{ persona.first_name }} must leave with.>
+
+## Why now
+2-3 sentences. Lead with the KPI, deadline, or commitment forcing the meeting.
+
+## Who's in the room
+| Name | Role / Org | What they want | Decision power | Recent signal |
+|------|------------|----------------|----------------|---------------|
+
+## Run of show (time-boxed)
+| Min | Topic | Owner | Outcome to reach |
+|-----|-------|-------|------------------|
+
+## Decisions to land
+- **Decision:** <statement> — **{{ persona.first_name }} needs:** <data / approval / who> — **Blocker:** <if any>
+
+## Compliance & control angle
+One line. Name any SOX / Trade / Tax / Privacy / Anticorruption / Payments touchpoint, or "none identified."
+
+## {{ persona.first_name }}'s talking points (3-5, his voice)
+Framed outcome -> lever -> partners -> KPI.
+
+## Risks & landmines
+What could derail the meeting, and the pre-empt for each.
+
+## Follow-up plan
+Who logs the decision (hand to the decisions-log skill), who owns each action, by when.
+
+## Sources
+Inline-cited; distinct links listed here.
+```
+
+Markdown is the working format. For a printed leave-behind use the Word (`docx`) skill; for a walk-in agenda slide use the PowerPoint (`pptx`) skill.
+
+## Voice rules
+
+Write {{ persona.first_name }}'s talking points in his voice:
+
+- **Tone:** {{ persona.voice.tone }}
+- **Lean on signature framing:** {% for p in persona.voice.signature_phrases %}"{{ p }}"{% if not loop.last %}, {% endif %}{% endfor %}.
+- **Framing pattern:** {{ persona.voice.framing_pattern | trim }}
+- **Avoid:** {% for a in persona.voice.avoid %}{{ a }}{% if not loop.last %}; {% endif %}{% endfor %}.
+
+{% include "_scout_platform.md.j2" %}
+## Quality bar — self-check before delivering
+
+- [ ] The "one outcome" is a single, specific decision or alignment — not "discuss."
+- [ ] Every attendee is named with their role and decision power (resolved via people search).
+- [ ] The run of show is time-boxed and sums to the meeting length.
+- [ ] Each decision to land names exactly what {{ persona.first_name }} needs to make it.
+- [ ] Any KPI on the table is shown with current value and target, sourced inline.
+- [ ] Compliance/control angle is stated, even if "none identified."
+- [ ] No Confidential or labeled content is pasted into the pack — summarized and linked instead.
+- [ ] Talking points sound like {{ persona.first_name }}, not a generic facilitator.
+
+If any check fails, fix it before delivering.

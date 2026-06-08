@@ -131,7 +131,7 @@ it doesn't.
 | Idea | Verdict | Note |
 |------|---------|------|
 | NL "skill builder" / intent capture | Adopt | Already the meta-skill's job; strengthen its intake. |
-| Use-case templates for execs | Adopt | Have 4 archetypes; consider adding meeting-prep and decisions-log. |
+| Use-case templates for execs | Adopt — done | Now 8 archetypes; added meeting-prep, decisions-log, 1:1 prep, and review prep. |
 | Proactive/contextual suggestions | Adopt → map to Scout | Implement as Automations + Heartbeat, not a custom UI. |
 | Executive persona config (stakeholders, recurring reports, comms style) | Adopt | This is P4 persona-schema work. |
 | Categorization / tagging / versioning / sharing | Partial | Versioning = git + `m-skills` sync. Tagging is low value for file-based skills. |

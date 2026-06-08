@@ -68,6 +68,26 @@ WORKFLOWS = {
         "title_suffix": "Strategic Analysis Memo",
         "default_slug_suffix": "strategy",
     },
+    "meeting-prep": {
+        "template": "meeting-prep.md.j2",
+        "title_suffix": "Meeting Prep",
+        "default_slug_suffix": "meeting-prep",
+    },
+    "decisions-log": {
+        "template": "decisions-log.md.j2",
+        "title_suffix": "Decisions Log",
+        "default_slug_suffix": "decisions-log",
+    },
+    "one-on-one": {
+        "template": "one-on-one.md.j2",
+        "title_suffix": "1:1 Prep",
+        "default_slug_suffix": "one-on-one",
+    },
+    "review-prep": {
+        "template": "review-prep.md.j2",
+        "title_suffix": "Business Review Prep",
+        "default_slug_suffix": "review-prep",
+    },
 }
 
 
