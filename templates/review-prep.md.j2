@@ -1,0 +1,127 @@
+---
+name: {{ skill_slug }}
+description: |
+  Builds {{ persona.display_name }}'s ({{ persona.title }}, {{ persona.org }}) monthly or quarterly business review — KPI scorecard, narrative, wins, risks with recovery plans, and the decisions to land. Use when {{ persona.first_name }} asks to "prep my QBR," "build my monthly business review," "get me ready for the MBR," "pull my KPI scorecard for the review," or "what's my review narrative." Always grounds every metric in a sourced dashboard, ties misses to a root cause and a recovery owner, and surfaces the asks {{ persona.first_name }} needs from leadership.
+---
+
+# {{ skill_title }}
+
+You are preparing the business review for **{{ persona.display_name }}**, **{{ persona.title }}**, {{ persona.org }} — a monthly (MBR) or quarterly (QBR) readout to leadership and partner orgs.
+
+## When to use this skill
+
+Activate when {{ persona.first_name }} (or a scheduled automation on his behalf) asks for any of:
+
+- "Prep my QBR" / "Build my monthly business review"
+- "Get me ready for the MBR"
+- "Pull my KPI scorecard for the review"
+- "What's my review narrative this cycle?"
+- "Build the review deck outline"
+
+Do NOT use this skill for: a single ad-hoc meeting's run-of-show (use the meeting-prep skill), a deep strategic memo on one question (use the strategy skill), or the daily/weekly digest (use the triage skill).
+
+## What a business review must deliver
+
+A review proves the operation is on track — or names exactly where it isn't and who is recovering it. Each review must answer:
+
+1. **Are we hitting the numbers?** A KPI scorecard across {{ persona.process_domains | join(", ") }}, each metric vs. target with a trend and a RAG status.
+2. **What's the narrative?** The three-sentence story leadership should remember — outcome, lever, proof.
+3. **What won, and why?** Wins tied to the KPI they moved.
+4. **What missed, and what's the recovery?** Every red or amber metric gets a root cause and a named recovery owner with a date.
+5. **What does {{ persona.first_name }} need from the room?** Decisions, budget, headcount, or partner-org commitments.
+6. **Where are the controls?** Compliance posture across SOX, Trade, Tax, Privacy, Anticorruption, Payments — flagged, never assumed clean.
+
+If a KPI lacks a source this cycle, mark it "unsourced — do not present" rather than showing an unbacked number.
+
+{% include "_persona_grounding.md.j2" %}
+
+## Required research steps
+
+Assemble the review from systems of record, not from memory.
+
+1. **Scorecard pull (`m365_*` + dashboards):** for each KPI in {{ persona.process_domains | join(", ") }}, pull current value, target, prior-cycle value, and trend from its dashboard. Link every figure.
+2. **Cross-service narrative (WorkIQ):** sweep "what changed this cycle across {{ persona.process_domains | join(", ") }} — launches, incidents, partner milestones" to assemble the wins, the misses, and their causes.
+3. **Partner-org status (`m365_*` + people search):** for each org in {{ persona.partner_orgs | join(", ") }}, pull the cycle's commitment status and resolve the named owner.
+4. **Compliance posture (`m365_*`):** pull any control event, audit finding, or sign-off due this cycle; summarize and link — do not paste audit detail.
+5. **Last review's asks:** check which decisions or commitments from the prior review closed, and carry the open ones forward.
+
+Cite every number inline with its dashboard link. Never fabricate or round-to-impress a figure.
+
+## Output format — the review pack
+
+Save to `{{ "{" }}workspace{{ "}" }}/reviews/{{ "{" }}YYYY-MM-DD{{ "}" }}-{{ "{" }}mbr-or-qbr{{ "}" }}.md` and surface inline:
+
+```
+# <MBR | QBR>: {{ persona.org }} — {{ persona.first_name }}, <period>
+
+## Narrative (3 sentences)
+Outcome -> lever -> proof. The story leadership remembers.
+
+## KPI scorecard
+| KPI | Domain | Target | Actual | Prior | Trend | RAG | Owner |
+|-----|--------|--------|--------|-------|-------|-----|-------|
+
+## Wins (each tied to a KPI)
+- <Win> -> moved <KPI> from <x> to <y>. <Source.>
+
+## Risks & misses (every red or amber)
+| KPI / area | Status | Root cause | Recovery action | Owner | By when |
+|------------|--------|-----------|-----------------|-------|---------|
+
+## Decisions & asks for the room
+- **Ask:** <decision / budget / headcount / partner commitment> — **from:** <who> — **why now:** <KPI / deadline>
+
+## Partner-org status
+One line per org in {{ persona.partner_orgs | join(", ") }}: commitment, status, named owner.
+
+## Compliance & control posture
+SOX / Trade / Tax / Privacy / Anticorruption / Payments — events, sign-offs due, findings (linked, not pasted). If clean: "no open control items this cycle."
+
+## Carry-forward from last review
+Open asks and commitments still in flight.
+
+## Appendix — sources
+Every dashboard and document linked.
+```
+
+Render the readout deck with the PowerPoint (`pptx`) skill, or a one-page leave-behind with the Word (`docx`) skill; for a live, filterable scorecard use the Web Artifacts Builder skill.
+
+## Run this as a Scout automation
+
+Business reviews run on a fixed cadence, so set a Scout **Automation** (Automations -> New automation -> Schedule trigger) to draft the pack a few days ahead:
+
+| Name | Schedule | Prompt | Scope |
+|------|----------|--------|-------|
+| {{ persona.first_name }} — MBR draft | First business day of each month, 7:00 AM | "Build my monthly business review." | Prior month vs. target |
+| {{ persona.first_name }} — QBR draft | One week before quarter end, 7:00 AM | "Build my quarterly business review." | Quarter vs. plan; partner-org commitments |
+
+### Heartbeat-safe behavior
+
+When this runs unattended:
+
+- Write the draft pack to the workspace and surface it; **do not** send it, share the deck, or take any approval-gated action — {{ persona.first_name }} reviews and presents.
+- Show any unsourced metric as a gap to fill, never as a presented number.
+- Keep labeled or Confidential control detail out of the body — summarize and link.
+
+## Voice rules
+
+Write the narrative and the asks in {{ persona.first_name }}'s voice:
+
+- **Tone:** {{ persona.voice.tone }}
+- **Lean on signature framing:** {% for p in persona.voice.signature_phrases %}"{{ p }}"{% if not loop.last %}, {% endif %}{% endfor %}.
+- **Framing pattern:** {{ persona.voice.framing_pattern | trim }}
+- **Avoid:** {% for a in persona.voice.avoid %}{{ a }}{% if not loop.last %}; {% endif %}{% endfor %}.
+
+{% include "_scout_platform.md.j2" %}
+## Quality bar — self-check before delivering
+
+- [ ] Every KPI in the scorecard shows target, actual, and trend, each sourced to a dashboard link.
+- [ ] The narrative is three sentences and leads with the business outcome.
+- [ ] Every red or amber metric has a root cause and a named recovery owner with a date.
+- [ ] Each ask names who it's from and the KPI or deadline forcing it.
+- [ ] Partner-org status names a real owner per org (people-search-resolved).
+- [ ] Compliance posture is explicit — flagged or "no open control items," never silently omitted.
+- [ ] No unsourced number is presented as fact; gaps are marked.
+- [ ] No labeled/Confidential control detail is pasted — summarized and linked instead.
+
+If any check fails, fix it before {{ persona.first_name }} walks into the review.

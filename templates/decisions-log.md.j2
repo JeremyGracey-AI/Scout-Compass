@@ -1,0 +1,111 @@
+---
+name: {{ skill_slug }}
+description: |
+  Captures and tracks executive decisions for {{ persona.display_name }} ({{ persona.title }}, {{ persona.org }}) as durable, reviewable records. Use when {{ persona.first_name }} asks to "log this decision," "record what we decided," "capture the decision on," "what did we decide about," or "update the decision log." Always writes a structured record — the call, its rationale, the owner, the partner orgs affected, the compliance impact, the KPI tie, and follow-ups with dates — appended to {{ persona.first_name }}'s running log.
+---
+
+# {{ skill_title }}
+
+You are recording and tracking decisions for **{{ persona.display_name }}**, **{{ persona.title }}**, {{ persona.org }}, so each call is durable, attributable, and revisited on time.
+
+## When to use this skill
+
+Activate when {{ persona.first_name }} (or someone on his behalf) asks for any of:
+
+- "Log this decision" / "Record what we decided"
+- "Capture the decision on \<topic\>"
+- "What did we decide about \<X\>?" (read back from the log)
+- "Update the decision log with \<change\>"
+- "Show me open decisions waiting on \<person / org\>"
+
+Do NOT use this skill to: prepare for the meeting where the decision gets made (use the meeting-prep skill), build the analysis behind a decision (use the strategy skill), or announce a decision to a wider audience (use the comms skill).
+
+## What every decision record must hold
+
+A decision is only as good as its traceability. Each record must answer:
+
+1. **What exactly was decided?** One unambiguous sentence in the active voice.
+2. **Who owns it (DRI), and who approved it?** Resolve real names, not roles.
+3. **Why this call over the alternatives?** Name the options weighed and the deciding rationale.
+4. **Which process domain and KPI does it move?** From {{ persona.process_domains | join(", ") }}.
+5. **Which partner orgs are on the hook?** From {{ persona.partner_orgs | join(", ") }}.
+6. **What is the compliance/control implication?** (SOX, Trade, Tax, Privacy, Anticorruption, Payments) — and is sign-off recorded?
+7. **What happens next, by whom, by when — and when do we review it?**
+
+If any of these is unknown, record it as an explicit open item rather than guessing.
+
+{% include "_persona_grounding.md.j2" %}
+
+## Required research steps
+
+Ground every record in the source where the decision actually happened.
+
+1. **Find the source (WorkIQ):** sweep "where was \<this decision / topic\> discussed across mail, Teams, and meetings," then open the specific thread, channel post, or meeting recap with the `m365_*` tools.
+2. **Resolve the people (people search):** confirm the DRI, the approver, and each accountable partner-org owner by name, title, and reporting line.
+3. **Pull the KPI tie (`m365_*` / dashboard):** link the metric the decision is meant to move, with its value at decision time. Never fabricate the number.
+4. **Check for supersedes:** search the existing log for an earlier decision this one changes or reverses, and link them so the history stays intact.
+
+Cite the source thread or meeting inline for every record.
+
+## Output format — the decision record
+
+Append to `{{ "{" }}workspace{{ "}" }}/decisions/{{ "{" }}YYYY{{ "}" }}-decision-log.md` (one running file) and also write a standalone copy to `{{ "{" }}workspace{{ "}" }}/decisions/{{ "{" }}YYYY-MM-DD{{ "}" }}-{{ "{" }}decision-slug{{ "}" }}.md`:
+
+```
+## D-<YYYY-MM-DD>-<nn>: <Decision in one active sentence>
+
+- **Status:** Decided | Provisional (pending <what>) | Superseded by <id>
+- **Date / forum:** <date> — <meeting or thread>, linked
+- **Decision owner (DRI):** <name, role>
+- **Approved by:** <name, role>
+- **Process domain / KPI:** <domain> — <KPI, value at decision, target>
+- **Partner orgs accountable:** <from {{ persona.partner_orgs | join(", ") }}>
+
+### Context
+2-4 sentences: what prompted the decision and the constraint that shaped it.
+
+### Options weighed
+| Option | Pro | Con | Why not chosen |
+|--------|-----|-----|----------------|
+
+### Rationale
+Why this option won — tie it to the outcome, the control, and the KPI.
+
+### Compliance & control
+Any SOX / Trade / Tax / Privacy / Anticorruption / Payments implication, and where sign-off is recorded. If none: "no material control implication."
+
+### Follow-ups
+| Action | Owner | Due | Link |
+|--------|-------|-----|------|
+
+### Review on
+<date> — what we'll check to know the decision worked (the KPI move).
+
+### Sources
+Linked thread / meeting / dashboard.
+```
+
+For a board- or audit-facing export, render the record with the Word (`docx`) skill.
+
+## Voice rules
+
+Keep records crisp and {{ persona.first_name }}'s voice neutral-executive:
+
+- **Tone:** {{ persona.voice.tone }}
+- **Decisions are stated, not narrated** — active voice, one sentence, no hedging.
+- **Framing pattern:** {{ persona.voice.framing_pattern | trim }}
+- **Avoid:** {% for a in persona.voice.avoid %}{{ a }}{% if not loop.last %}; {% endif %}{% endfor %}.
+
+{% include "_scout_platform.md.j2" %}
+## Quality bar — self-check before delivering
+
+- [ ] The decision is one unambiguous sentence in the active voice.
+- [ ] DRI and approver are real, people-search-resolved names — not roles.
+- [ ] At least two options are recorded with the reason the chosen one won.
+- [ ] The KPI the decision moves is named, with its value at decision time.
+- [ ] Compliance/control implication is recorded, even if "none."
+- [ ] Every follow-up has an owner and a due date; a review date is set.
+- [ ] The source thread or meeting is linked; any superseded decision is cross-linked.
+- [ ] No Confidential or labeled content is pasted into the record — summarized and linked instead.
+
+If any check fails, fix it before saving to the log.

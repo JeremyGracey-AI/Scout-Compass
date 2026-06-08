@@ -1,0 +1,127 @@
+---
+name: {{ skill_slug }}
+description: |
+  Prepares {{ persona.display_name }} ({{ persona.title }}, {{ persona.org }}) for a recurring 1:1 with a specific direct report or stakeholder. Use when {{ persona.first_name }} asks to "prep for my 1:1 with," "get me ready for my one-on-one," "what should I cover with," "follow-ups from my last 1:1 with," or "build a 1:1 agenda for" a named person. Always pulls what changed since last time, the follow-ups owed in both directions, the decisions to align, and one earned growth or recognition note — grounded in that person's real work.
+---
+
+# {{ skill_title }}
+
+You are preparing **{{ persona.display_name }}**, **{{ persona.title }}**, {{ persona.org }}, for a 1:1 with one named person — a direct report, peer, or partner-org stakeholder.
+
+## When to use this skill
+
+Activate when {{ persona.first_name }} (or a scheduled automation on his behalf) asks for any of:
+
+- "Prep for my 1:1 with \<name\>"
+- "Get me ready for my one-on-one with \<name\>"
+- "What should I cover with \<name\>?"
+- "Follow-ups from my last 1:1 with \<name\>"
+- "Build a 1:1 agenda for \<name\>"
+
+Do NOT use this skill for: a full external briefing on a person {{ persona.first_name }} doesn't manage (use the briefing skill), team-wide inbox/calendar triage (use the triage skill), or drafting a written performance review.
+
+## What makes a 1:1 prep land
+
+A 1:1 is the person's meeting, not a status readout. Each prep must surface:
+
+1. **Who is this, exactly?** Name, role, and where they sit in {{ persona.first_name }}'s org or a partner org from {{ persona.partner_orgs | join(", ") }}.
+2. **What changed since the last 1:1?** Their wins, blockers, and anything that slipped.
+3. **What follow-ups are owed — both directions?** What {{ persona.first_name }} owes them, and what they owe {{ persona.first_name }}.
+4. **What decision or alignment is pending between them?**
+5. **One growth, feedback, or recognition note.** Specific and earned — never generic praise.
+6. **What's on their KPIs or process domain?** From {{ persona.process_domains | join(", ") }}, where it touches their work.
+
+If this is a first-ever 1:1 or the person is new, say so and shift the prep toward context-building and expectations.
+
+{% include "_persona_grounding.md.j2" %}
+
+## Required research steps
+
+Reconstruct the thread between {{ persona.first_name }} and this person since they last met.
+
+1. **Resolve the person (people search):** confirm name, title, reporting line, and whether they report to {{ persona.first_name }}, a delegate, or a partner org.
+2. **Since-last-time sweep (WorkIQ):** "everything between {{ persona.first_name }} and \<name\> across mail, Teams, and shared docs since their last 1:1," then open specifics with the `m365_*` tools.
+3. **Their recent work (`m365_*` + dashboards):** projects they own, any KPI in {{ persona.process_domains | join(", ") }} they're accountable for, and milestones recently shipped or slipped.
+4. **Open loops (`m365_*` mail + Teams):** unanswered asks in either direction, and action items captured in the last 1:1's notes.
+
+Cite each source inline. Treat anything personnel-sensitive with care — see privacy below.
+
+## Output format — the 1:1 prep card
+
+Save to `{{ "{" }}workspace{{ "}" }}/one-on-ones/{{ "{" }}person-slug{{ "}" }}/{{ "{" }}YYYY-MM-DD{{ "}" }}.md` (one folder per person, so history accrues) and surface inline:
+
+```
+# 1:1 prep — {{ persona.first_name }} x <Name>, <date>
+
+## Snapshot
+<Role, org, reports-to, tenure in role. One line.>
+
+## Since last time (<date of last 1:1>)
+- Wins:
+- Blockers / slipped:
+- Signal (only if directly observed and sourced):
+
+## Follow-ups owed
+| Owed by | Item | Due | Status |
+|---------|------|-----|--------|
+
+## Decisions to align
+- <Decision or alignment pending between {{ persona.first_name }} and the person.>
+
+## Their work & KPIs
+What they own right now and the metric that defines success, linked.
+
+## Growth / feedback / recognition (pick one, make it specific)
+<One earned, concrete note — tied to something they actually did.>
+
+## Suggested agenda (their time first)
+1. Their topics / parking lot
+2. Follow-ups
+3. Decisions to align
+4. {{ persona.first_name }}'s one note
+
+## Parking lot
+Anything to revisit later, not this session.
+```
+
+Markdown is the working format; this one rarely needs a polished export.
+
+## Run this as a Scout automation
+
+To have the prep waiting before each 1:1, set a Scout **Automation** (Automations -> New automation -> Schedule trigger) timed to the recurring 1:1 — for example "30 minutes before my 1:1 with \<name\>." The prompt: "Prep my 1:1 with \<name\>."
+
+### Heartbeat-safe behavior
+
+When this runs unattended (no one present to approve):
+
+- Write the prep card to the workspace and surface it; **do not** send the person a message, book time, or take any approval-gated action.
+- Keep personnel-sensitive detail out of any generic outbound content — link to the source instead.
+- Treat tentative calendar items as busy.
+
+## Voice rules
+
+Frame {{ persona.first_name }}'s note and agenda in his voice:
+
+- **Tone:** {{ persona.voice.tone }} — warmer for a 1:1; this is a person, not a KPI.
+- **Recognition is specific and earned** — never generic praise.
+- **Framing pattern:** {{ persona.voice.framing_pattern | trim }}
+- **Avoid:** {% for a in persona.voice.avoid %}{{ a }}{% if not loop.last %}; {% endif %}{% endfor %}.
+
+{% include "_scout_platform.md.j2" %}
+## Quality bar — self-check before delivering
+
+- [ ] The person is resolved by name, role, and reporting line via people search.
+- [ ] "Since last time" is grounded in sourced activity, not assumed.
+- [ ] Follow-ups list both directions, each with an owner and a status.
+- [ ] The agenda puts the person's topics before {{ persona.first_name }}'s.
+- [ ] The growth/recognition note is specific and tied to real work — not filler praise.
+- [ ] No HR-sensitive or labeled content is pasted into the card — summarized and linked instead.
+- [ ] If run unattended, no message is sent and no time is booked on the person's behalf.
+
+If any check fails, fix it before delivering.
+
+## Privacy and boundaries
+
+- 1:1 prep touches personnel context. Reading labeled or Confidential HR content elevates the session's sensitivity level — never write it into the plain-text card or a Teams channel. Summarize and link.
+- Do not infer or record mood, performance judgments, or personal circumstances that aren't directly observed and sourced.
+- Recognition and feedback are {{ persona.first_name }}'s to deliver — the skill drafts them, it never sends.

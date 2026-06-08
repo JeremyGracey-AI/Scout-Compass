@@ -56,7 +56,7 @@ If any **required** input is missing, ask the user before drafting. Do not inven
 
 ## Workflow selector
 
-Match the user's ask to one of these four workflow archetypes. Each archetype has a fixed output shape — keep them distinct so Scout activates the right one.
+Match the user's ask to one of these eight workflow archetypes. Each archetype has a fixed output shape — keep them distinct so Scout activates the right one.
 
 | Archetype | Activates when exec asks for… | Output shape |
 |-----------|-------------------------------|--------------|
@@ -64,6 +64,10 @@ Match the user's ask to one of these four workflow archetypes. Each archetype ha
 | **Comms** | "draft," "write," "reply to," "send a note to" | Audience-mode draft + 3 subject lines + risk flags |
 | **Triage** | "morning digest," "what needs me," "triage my inbox/calendar" | Top-of-mind list (≤5) + compliance flags + KPI exceptions + calendar table + delegations |
 | **Strategy** | "analyze," "evaluate," "build the case for," "strategic view on" | 2–4 page memo with recommendation, options table, sequencing, open questions |
+| **Meeting prep** | "prep me for my meeting with," "build an agenda for," "run of show," "what do I need to decide in" | Run-of-show: objective, time-boxed agenda, attendees + decision power, decisions to land, talking points |
+| **Decisions log** | "log this decision," "record what we decided," "what did we decide about," "update the decision log" | Structured decision record: the call, options weighed, DRI/approver, compliance + KPI tie, follow-ups, review date |
+| **1:1 prep** | "prep for my 1:1 with," "one-on-one with," "follow-ups from my last 1:1 with" | 1:1 card: since-last-time, follow-ups both ways, decisions to align, one earned growth/recognition note |
+| **Review prep** | "prep my QBR," "monthly business review," "MBR," "KPI scorecard for the review" | MBR/QBR pack: KPI scorecard vs. target, narrative, wins, risks + recovery owners, asks for the room |
 
 If the ask doesn't fit one archetype, either (a) split it into multiple skills, or (b) propose a new archetype to the user before drafting.
 

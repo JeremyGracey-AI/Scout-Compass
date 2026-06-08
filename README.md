@@ -10,7 +10,7 @@ It ships three ways to create skills:
 2. **Web app** (`web/app.py`) — a persona-builder UI for non-technical users: fill a form (no YAML), preview the skills + automations, then one-click install into the Scout skills folder (or download a `.zip`). See [Web app](#web-app).
 3. **Meta-skill** (`meta_skill/compass/SKILL.md`) — drop this into Scout itself so Scout can author new exec skills on demand.
 
-All three share the same four executive workflow archetypes:
+All three share the same eight executive workflow archetypes:
 
 | Archetype | What the resulting skill produces |
 |-----------|-----------------------------------|
@@ -18,6 +18,10 @@ All three share the same four executive workflow archetypes:
 | `comms` | Audience-mode draft (team / partner-org / CVP / external / quick-reply / all-hands) with 3 subject lines and risk flags |
 | `triage` | Daily or weekly digest: top-of-mind (≤5), compliance flags, KPI exceptions, calendar table, delegations |
 | `strategy` | 2–4 page memo with recommendation, options table, sequencing, open questions |
+| `meeting-prep` | Run-of-show pack for a specific meeting: objective, time-boxed agenda, attendees + decision power, decisions to land, talking points |
+| `decisions-log` | Durable decision record: the call, options weighed, owner/approver, compliance + KPI tie, follow-ups, review date |
+| `one-on-one` | 1:1 prep card: since-last-time, follow-ups owed both ways, decisions to align, one earned growth/recognition note |
+| `review-prep` | MBR/QBR pack: KPI scorecard vs. target, narrative, wins, risks with recovery owners, asks for the room |
 
 ## Seeded persona
 
@@ -30,7 +34,7 @@ Add more personas by dropping new YAML files into `personas/` matching the same 
 ```bash
 pip install pyyaml jinja2 flask
 
-# CLI — generate all four skills for Morgan
+# CLI — generate the four core skills for Morgan
 python cli/compass.py \
   --persona personas/morgan_reyes.yaml \
   --workflows briefing,comms,triage,strategy \
@@ -80,10 +84,14 @@ scout-compass/
 ├── personas/
 │   └── morgan_reyes.yaml      # seed persona
 ├── templates/
-│   ├── briefing.md.j2          # Jinja2 templates for each archetype
+│   ├── briefing.md.j2          # Jinja2 templates — one per archetype
 │   ├── comms.md.j2
 │   ├── triage.md.j2
-│   └── strategy.md.j2
+│   ├── strategy.md.j2
+│   ├── meeting-prep.md.j2
+│   ├── decisions-log.md.j2
+│   ├── one-on-one.md.j2
+│   └── review-prep.md.j2
 ├── examples/
 │   └── morgan/                   # snapshot of generated skills for reference
 └── README.md
