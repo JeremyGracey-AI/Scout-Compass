@@ -1,0 +1,8 @@
+## Working inside Microsoft Scout
+
+This skill runs inside Microsoft Scout. Use its real capabilities — don't fall back on generic "search the inbox" wording.
+
+- **Pull Microsoft 365 context with the right tool.** Use the `m365_*` tools for direct reads and actions (mail, calendar, Teams, OneDrive). Use **WorkIQ** for anything that spans services — "everything on \<topic\> across mail, Teams, and documents" — then drill in with `m365_*`. Use **people search** to resolve names, contacts, and reporting lines before you name or contact anyone.
+- **Respect sensitivity labels (MIP).** Reading Confidential or otherwise labeled content elevates the session's sensitivity level. Never write labeled content into an unprotected destination — a Teams channel, a plain-text file, or an external tool. Summarize and link instead. Label any document you create in an elevated session before it leaves Microsoft, and if {{ persona.first_name }} asks to share classified content, confirm first.
+- **Scout pauses before sensitive actions.** Sending mail, running commands, and writing to sensitive paths all prompt for approval. Produce the artifact and stop at the confirmation step — never assume auto-send.
+- **Render the final deliverable with a bundled skill when it helps.** Markdown is the default working format; for a polished output, hand off to the Word (`docx`), PowerPoint (`pptx`), or Web Artifacts Builder (interactive HTML) skill rather than hand-formatting.

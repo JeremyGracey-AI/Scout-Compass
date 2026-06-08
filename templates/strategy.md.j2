@@ -1,0 +1,145 @@
+---
+name: {{ skill_slug }}
+description: |
+  Produces strategic analysis memos for {{ persona.display_name }} ({{ persona.title }}, {{ persona.org }}) — competitive moves, market reads, product/portfolio reviews, partner ecosystem shifts, AI/automation investment cases, and operations transformation options. Use when {{ persona.first_name }} asks to "analyze," "evaluate," "assess," "give me the strategic view on," "build the case for/against," or "review options for" a topic that requires more than a one-page brief. Always frames recommendations through KPI impact, compliance posture, and cross-functional partner alignment.
+---
+
+# {{ skill_title }}
+
+You are producing a strategic analysis memo for **{{ persona.display_name }}**, **{{ persona.title }}**, {{ persona.org }}.
+
+## When to use this skill
+
+Activate when {{ persona.first_name }} asks for any of:
+
+- "Analyze \<option / market / competitor / partner / proposal\>"
+- "Evaluate the case for / against \<X\>"
+- "Strategic view on \<topic\>"
+- "Build the business case for \<initiative\>"
+- "Review options for \<problem\>"
+- "How should we think about \<emerging change\>?"
+
+Do NOT use this skill for one-page meeting briefings (use the briefing skill) or quick replies (use the comms skill).
+
+## What "good" looks like for {{ persona.first_name }}
+
+{{ persona.first_name }}'s decision filters, applied in this order:
+
+{% for f in persona.decision_filters %}{{ loop.index }}. {{ f }}
+{% endfor %}
+
+A memo that doesn't surface these explicitly is not done.
+
+{% include "_persona_grounding.md.j2" %}
+
+## Memo shape
+
+Strategic memos are 2–4 pages (≤ 1500 words of prose, plus tables and one optional diagram). Longer means buried. Shorter means under-supported.
+
+Saved to `{{ "{" }}workspace{{ "}" }}/strategy/{{ "{" }}YYYY-MM-DD{{ "}" }}-{{ "{" }}topic-slug{{ "}" }}.md`:
+
+```
+# Strategic Memo: <Topic>
+**For:** {{ persona.first_name }} ({{ persona.title }})
+**From:** Scout — Operations Enablement
+**Date:** <YYYY-MM-DD>
+**Status:** DRAFT for review
+
+## Recommendation (1 paragraph, ≤ 80 words)
+State the recommendation, the KPI it moves, the rough magnitude, and the timing. No preamble.
+
+## Why now (3–5 bullets)
+The forcing function — market move, compliance change, KPI exception, partner commitment, or platform shift.
+
+## Options considered
+For each option (typically 2–4):
+
+### Option <N>: <name>
+- **What it is:** 2–3 sentences.
+- **KPI impact:** Which KPI(s), direction, rough magnitude, time to realize.
+- **Compliance / control implications:** Specific SOX / Trade / Tax / Privacy / Anticorruption / Payments touchpoints. If none, say so.
+- **Cross-functional partners required:** Named orgs from {{ persona.partner_orgs | join(", ") }}, and the specific leader where known.
+- **AI / automation leverage:** Where AI or automation changes the cost or risk profile vs. headcount-only.
+- **Investment:** Headcount, dollars, calendar quarters.
+- **Risks:** Top 3 with mitigation owner.
+- **Decision rights & approvals:** Who signs.
+
+### Recommendation rationale
+Why the chosen option wins on {{ persona.first_name }}'s decision filters. Be explicit about which filter dominated.
+
+## What we know vs. what we assume
+| Claim | Evidence | Source | Confidence |
+|-------|----------|--------|------------|
+
+Confidence is High / Medium / Low. Anything Low must be flagged in "Open questions" too.
+
+## Sequencing & milestones
+A 90 / 180 / 365-day view. Each milestone has an owner, a KPI checkpoint, and a partner-org dependency.
+
+| Horizon | Milestone | Owner | KPI checkpoint | Partner-org dependency |
+|---------|-----------|-------|----------------|------------------------|
+
+## What this changes for Operations and partners
+2–3 paragraphs on operating model, partner-org dynamics, and talent implications.
+
+## Open questions for {{ persona.first_name }}
+The 3–5 questions only he can answer (typically about appetite, sequencing, and partner-org politics).
+
+## Appendix
+- Data and sources (linked inline above as well)
+- Competing or dissenting views considered
+- Glossary if the memo introduces new terms
+```
+
+Markdown is the working draft. For circulation, render the memo with the Word (`docx`) skill; for a board or CVP readout, hand the recommendation + options table to the PowerPoint (`pptx`) skill. Strategy memos are usually Confidential — label before sharing.
+
+## Required research
+
+Strategic memos must be grounded. Run these in parallel before drafting:
+
+1. **Microsoft-internal**
+   - Most recent Operations, Engineering, Partner Program, and Finance leadership communications relevant to the topic — use **WorkIQ** across mail, Teams, and SharePoint, then `m365_*` to pull specifics.
+   - Prior decisions on this or adjacent topics (search for memos, decision logs).
+   - KPI dashboards covering {{ persona.process_domains | join(", ") }} that touch the topic.
+2. **Public Microsoft signals**
+   - Most recent FY earnings transcripts and 10-K/10-Q references to the topic area.
+   - Public Microsoft blog / newsroom announcements on the topic in the last 180 days.
+   - Microsoft Learn and Trust Center documentation for any compliance-touching options.
+3. **External competitive and market**
+   - Last 90–180 days of public moves from named competitors (AWS, Google, Salesforce, ServiceNow, Workday, SAP — choose by topic relevance).
+   - Analyst commentary (Gartner, Forrester, IDC) only if a specific recent report applies.
+   - Regulatory or standards changes if compliance is in scope.
+4. **Quantitative**
+   - Pull the latest values for any KPI named in the recommendation.
+   - If you cite market size, cite the primary source, not a downstream summary.
+
+Cite every number and quote inline with source name + URL. Never fabricate a figure.
+
+## Voice rules
+
+- **Tone:** {{ persona.voice.tone }}. Strategic memos are calm, even when the recommendation is bold.
+- **Framing pattern:** {{ persona.voice.framing_pattern | trim }}
+- **Signature framing to lean on:** {% for p in persona.voice.signature_phrases %}"{{ p }}"{% if not loop.last %}, {% endif %}{% endfor %}.
+- **Always avoid:** {% for a in persona.voice.avoid %}{{ a }}{% if not loop.last %}; {% endif %}{% endfor %}.
+
+Specific style asks:
+
+1. No throat-clearing introductions. The recommendation is paragraph one.
+2. Every option section has the same sub-headings, in the same order, every time.
+3. Tables for anything comparative — never prose comparisons across 3+ options.
+4. Confidence labels (High / Medium / Low) on any claim that isn't directly sourced.
+
+{% include "_scout_platform.md.j2" %}
+## Quality bar — self-check before delivering
+
+- [ ] Recommendation paragraph ≤ 80 words and leads the memo.
+- [ ] Every option has KPI impact, compliance posture, partner-org list, AI leverage, investment, risks, and decision rights.
+- [ ] At least one KPI from {{ persona.process_domains | join(" / ") }} is named with current value and target.
+- [ ] Compliance posture is addressed for every option (even if "no material exposure").
+- [ ] Any Confidential/labeled source is summarized and linked, not pasted; the memo is labeled before sharing.
+- [ ] Sequencing table covers 90 / 180 / 365 days.
+- [ ] "What we know vs. what we assume" table is filled, with confidence labels.
+- [ ] 3–5 open questions only {{ persona.first_name }} can answer are listed at the end.
+- [ ] Total prose ≤ 1500 words.
+
+If any check fails, revise before delivering.

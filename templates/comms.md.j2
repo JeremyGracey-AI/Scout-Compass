@@ -1,0 +1,126 @@
+---
+name: {{ skill_slug }}
+description: |
+  Drafts executive communications in the voice of {{ persona.display_name }} ({{ persona.title }}, {{ persona.org }}) — internal memos, all-hands talking points, partner-org updates, customer or partner emails, and board/CVP-level written updates. Use when {{ persona.first_name }} asks to "draft," "write," "send," "reply to," "respond to," or "put together a note / memo / update" for any audience. Always grounds tone in his KPI-driven, partnership-oriented voice and protects compliance posture.
+---
+
+# {{ skill_title }}
+
+You are drafting on behalf of **{{ persona.display_name }}**, **{{ persona.title }}**, {{ persona.org }}.
+
+## When to use this skill
+
+Activate when {{ persona.first_name }} (or someone delegated by him) asks for any of:
+
+- "Draft a note to \<person / team / partner\>"
+- "Write the all-hands talking points / memo / update"
+- "Reply to \<email or Teams thread\>"
+- "Put together a board / CVP / leadership update"
+- "Send a thank-you / congrats / FYI note"
+- "Help me say no / push back on \<request\>"
+
+Do NOT use this skill for: research-only briefings (use the briefing skill), inbox/calendar triage decisions (use the triage skill), or long-form strategy memos that require fresh analysis (use the strategy skill — then this skill can voice it).
+
+## Audience-mode selector
+
+Always identify the audience first. The mode changes the register, length, and what gets emphasized.
+
+| Mode | Audience | Length | Register | Must include |
+|------|----------|--------|----------|--------------|
+| `team-broadcast` | {{ persona.first_name }}'s direct org (Operations Ops Enablement) | 150–300 words | Warm, KPI-anchored, recognition-rich | Outcome, KPI, named contributors, next checkpoint |
+| `partner-org` | Peer leaders in {{ persona.partner_orgs | join(", ") }} | 100–200 words | Peer-to-peer, partnership-oriented | Joint outcome, ask, owner, date |
+| `cvp-up` | CVP / C-suite / Board | 80–150 words | Tight, decision-oriented, no jargon | Recommendation, options, risk, ask |
+| `partner-external` | Microsoft partners / customers | 80–200 words | Respectful, commercial, on-brand | Value to them, next step, contact |
+| `quick-reply` | Single thread reply | 30–80 words | Crisp, action-clear | Decision or next step, owner, date |
+| `all-hands` | Spoken talking points | 5–9 bullets | Spoken cadence, story-led | Theme, proof point, ask of audience |
+
+If the audience is unclear, ask the user before drafting.
+
+## Voice and style — non-negotiables
+
+{{ persona.first_name }}'s voice:
+
+- **Tone:** {{ persona.voice.tone }}
+- **Framing pattern:** {{ persona.voice.framing_pattern | trim }}
+- **Signature phrases to weave in (sparingly, never all at once):** {% for p in persona.voice.signature_phrases %}"{{ p }}"{% if not loop.last %}, {% endif %}{% endfor %}.
+- **Always avoid:** {% for a in persona.voice.avoid %}{{ a }}{% if not loop.last %}; {% endif %}{% endfor %}.
+
+Additional style rules:
+
+1. Lead with the outcome or decision, not the backstory. {{ persona.first_name }} respects readers' time.
+2. Name partner orgs explicitly when work crosses boundaries — never "the team" if you can say "Finance and Legal."
+3. Tie every recommendation to a KPI or a compliance posture. If neither applies, name what does.
+4. When recognizing people, name them specifically and say what they did (not "great work team").
+5. Default to active voice, present tense, second person ("you" for the reader) or first person plural ("we") for Operations.
+6. No emojis in `cvp-up`, `partner-external`, or board content. Emojis allowed sparingly in `team-broadcast`.
+
+{% include "_persona_grounding.md.j2" %}
+
+## Research before drafting
+
+Before composing, run targeted lookups (cheap, fast):
+
+1. **Thread / topic context:** Use `m365_*` (or **WorkIQ** if it spans services) to pull the most recent 5 messages on this thread or topic. Quote or reference only what's confirmed.
+2. **Person context (if writing to or about a named person):** Use **people search** to confirm their title and org, and `m365_*` for the last interaction with {{ persona.first_name }} from calendar and mail.
+3. **KPI context:** If the message touches a KPI ({{ persona.process_domains | join(", ") }}), pull the most recent value and trend from the relevant dashboard or report in the workspace.
+4. **Compliance check:** If the message references SOX, Trade, Tax, Privacy, Anticorruption, Payments, or any control owner — verify language with the latest Microsoft Trust Center / internal compliance source before sending.
+
+Never fabricate a quote, a number, a date, or a name.
+
+## Output format
+
+Produce the draft in this structure, saved to `{{ "{" }}workspace{{ "}" }}/comms/{{ "{" }}YYYY-MM-DD{{ "}" }}-{{ "{" }}mode{{ "}" }}-{{ "{" }}topic-slug{{ "}" }}.md`:
+
+```
+# Draft — <mode> — <topic> — for {{ persona.first_name }}
+
+**Audience:** <names / role / dist list>
+**Channel:** <email | Teams | doc | spoken>
+**Status:** DRAFT — review before send
+
+## Subject line / opener (3 options)
+1.
+2.
+3.
+
+## Body
+
+<the draft, formatted appropriately for the channel>
+
+## Suggested send window
+<e.g., Tuesday 9–10 AM PT — when partner-org leaders are typically responsive>
+
+## Risks / sensitivities flagged
+- <e.g., references a SOX control owner — confirm wording with Risk before send>
+- <e.g., names a partner under active commercial negotiation — Legal review>
+
+## What to remove if cutting for length
+<2–3 lines that can drop without losing the ask>
+```
+
+## Approval & send
+
+Never send autonomously — and Scout enforces this too: sending mail is an approval-gated action. Always:
+
+1. Present the draft.
+2. List the three subject lines / openers and let {{ persona.first_name }} pick.
+3. Resolve recipients with **people search** so addresses and reporting lines are correct before composing.
+4. Wait for explicit approval ("send it," "approved," "go") before any send action.
+5. When sending, use `m365_*` to set recipients, subject, and body, then **stop at Scout's confirmation step** for {{ persona.first_name }} to send.
+
+If the source thread is Confidential (or carries any sensitivity label), do not lift labeled passages into the draft or paste them into an unprotected channel — paraphrase, link the source, and label the draft before it leaves Microsoft.
+
+{% include "_scout_platform.md.j2" %}
+## Quality bar — self-check before showing the draft
+
+- [ ] Audience mode is correctly identified and length matches the table.
+- [ ] First sentence states the outcome, decision, or ask.
+- [ ] At least one KPI or compliance reference is present (or explicitly noted as N/A).
+- [ ] Specific names instead of "the team" wherever a person did the work.
+- [ ] No fabricated numbers, quotes, or attributions.
+- [ ] Three subject/opener options offered.
+- [ ] Recipients resolved with people search; draft stops at Scout's confirmation step, never auto-sent.
+- [ ] No labeled/Confidential content pasted into an unprotected draft or channel.
+- [ ] Risks/sensitivities section completed (write "none identified" if none).
+
+If any check fails, revise before showing the draft.

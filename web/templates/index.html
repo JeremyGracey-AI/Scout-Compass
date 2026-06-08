@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Scout Skill Forge</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #171a21; --panel2: #1e222b; --line: #2a2f3a;
+    --ink: #e8ebf0; --ink-dim: #9aa3b2; --accent: #4f8cff; --accent2: #6ce0c0;
+    --bad: #ff6b6b; --warn: #ffc44d; --good: #6ce0a0; --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    padding: 16px 22px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: baseline; gap: 12px; position: sticky; top: 0;
+    background: var(--bg); z-index: 5;
+  }
+  header h1 { font-size: 17px; margin: 0; }
+  header .sub { color: var(--ink-dim); font-size: 12.5px; }
+  .wrap { display: grid; grid-template-columns: 420px 1fr; gap: 0; min-height: calc(100vh - 56px); }
+  .left { border-right: 1px solid var(--line); padding: 18px; overflow-y: auto; }
+  .right { padding: 18px 20px; overflow-y: auto; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-dim); margin: 4px 0 12px; }
+  .seg { display: inline-flex; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 3px; margin-bottom: 14px; }
+  .seg button { background: transparent; border: 0; color: var(--ink-dim); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  label { display: block; font-size: 12.5px; color: var(--ink-dim); margin: 12px 0 4px; }
+  label .req { color: var(--accent); }
+  input[type=text], textarea, select {
+    width: 100%; background: var(--panel); border: 1px solid var(--line); color: var(--ink);
+    border-radius: 8px; padding: 8px 10px; font: inherit; resize: vertical;
+  }
+  textarea { min-height: 52px; }
+  .hint { font-size: 11.5px; color: var(--ink-dim); margin-top: 3px; }
+  details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 6px; }
+  summary { cursor: pointer; color: var(--ink-dim); font-size: 12.5px; padding: 6px 0; }
+  .wf { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .wf label { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 6px 10px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); cursor: pointer; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  button.btn { border: 1px solid var(--line); background: var(--panel2); color: var(--ink);
+    padding: 9px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+  button.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.btn.good { background: var(--accent2); border-color: var(--accent2); color: #08231c; font-weight: 600; }
+  button.btn:disabled { opacity: .5; cursor: not-allowed; }
+  .msg { margin: 12px 0; padding: 10px 12px; border-radius: 8px; font-size: 13px; display: none; }
+  .msg.show { display: block; }
+  .msg.err { background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.35); color: #ffb1b1; }
+  .msg.ok { background: rgba(108,224,160,.1); border: 1px solid rgba(108,224,160,.35); color: #9af0c4; }
+  .msg.info { background: rgba(79,140,255,.1); border: 1px solid rgba(79,140,255,.3); color: #bcd2ff; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .tab { padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-size: 12.5px; color: var(--ink-dim); }
+  .tab.active { background: var(--panel2); color: var(--ink); border-color: var(--accent); }
+  .badge { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; margin-left: 6px; background: rgba(108,224,160,.18); color: var(--good); }
+  .badge.bad { background: rgba(255,107,107,.18); color: var(--bad); }
+  .pane { display: none; }
+  .pane.active { display: block; }
+  .meta { color: var(--ink-dim); font-size: 12px; margin-bottom: 8px; }
+  pre.skill { background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-word; max-height: 60vh; overflow: auto; }
+  .errors, .warnings { padding: 9px 11px; border-radius: 8px; margin-bottom: 10px; font-size: 12.5px; }
+  .errors { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.35); color: #ffb1b1; }
+  .warnings { background: rgba(255,196,77,.08); border: 1px solid rgba(255,196,77,.35); color: #ffd98a; }
+  .empty { color: var(--ink-dim); padding: 40px 0; text-align: center; }
+  .manage { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .skillrow { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; background: var(--panel); }
+  .skillrow code { font-size: 12.5px; }
+  .skillrow button { border: 1px solid rgba(255,107,107,.4); background: transparent; color: #ffb1b1; border-radius: 6px; padding: 4px 9px; cursor: pointer; font-size: 12px; }
+  .pill { font-size: 11px; color: var(--ink-dim); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; }
+  #authbar { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  #authbar input { width: 190px; }
+  #libraryPanel { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+  <h1>Scout Skill Forge</h1>
+  <span class="sub">Build, preview, and install Microsoft Scout skills — no YAML required.</span>
+  <span id="authbar"></span>
+</header>
+
+<div class="wrap">
+  <!-- LEFT: builder -->
+  <div class="left">
+    <div id="libraryPanel" style="display:none">
+      <h2 style="margin-top:0">My executives</h2>
+      <div id="libraryList"><div class="empty">Loading…</div></div>
+      <div class="actions" style="margin-top:8px">
+        <button class="btn" id="saveLibBtn" type="button">Save current to library</button>
+        <button class="btn" id="newLibBtn" type="button">New / clear</button>
+      </div>
+    </div>
+
+    <div class="seg" id="mode">
+      <button data-mode="new" class="on">Build a new executive</button>
+      <button data-mode="saved">Use a saved persona</button>
+    </div>
+
+    <div id="savedPane" style="display:none">
+      <label>Saved persona</label>
+      <select id="savedSelect"></select>
+      <div class="hint">Loaded from the server's <code>personas/</code> folder.</div>
+    </div>
+
+    <form id="builder">
+      <label>Full name <span class="req">*</span></label>
+      <input type="text" id="display_name" placeholder="Morgan Reyes" required />
+      <label>Title <span class="req">*</span></label>
+      <input type="text" id="title" placeholder="General Manager, Operations Enablement" required />
+      <label>Org <span class="req">*</span></label>
+      <input type="text" id="org" placeholder="Business Operations (Operations)" required />
+      <label>Charter — what they own <span class="req">*</span></label>
+      <textarea id="charter" placeholder="Lead Operations Enablement, driving KPI-driven continuous improvement and AI across quote-to-cash and partner lifecycle."></textarea>
+
+      <label>Process domains <span class="req">*</span></label>
+      <textarea id="process_domains" placeholder="One per line, e.g.&#10;Quote-to-cash (Q2C)&#10;Partner lifecycle"></textarea>
+      <label>Partner orgs <span class="req">*</span></label>
+      <textarea id="partner_orgs" placeholder="One per line, e.g.&#10;Finance&#10;Legal&#10;Risk"></textarea>
+
+      <label>Voice / tone <span class="req">*</span></label>
+      <input type="text" id="tone" placeholder="Executive, calm, KPI-anchored, partnership-oriented" />
+      <label>Signature phrases <span class="req">*</span></label>
+      <textarea id="signature_phrases" placeholder="One per line, e.g.&#10;KPI-driven continuous improvement&#10;at global scale"></textarea>
+      <label>Decision filters <span class="req">*</span></label>
+      <textarea id="decision_filters" placeholder="One per line, e.g.&#10;Does this measurably move a KPI?&#10;Which partner orgs need to be in the room?"></textarea>
+
+      <details>
+        <summary>Make it personal (optional) — support team, cadence, escalation</summary>
+        <label>Chief of staff</label>
+        <input type="text" id="chief_of_staff" placeholder="Leave blank to add a people-search step" />
+        <label>Executive assistant</label>
+        <input type="text" id="executive_assistant" />
+        <label>Direct reports</label>
+        <textarea id="direct_reports" placeholder="One per line: Name — Role"></textarea>
+        <label>Key stakeholders</label>
+        <textarea id="key_stakeholders" placeholder="One per line"></textarea>
+        <label>Time zone</label>
+        <input type="text" id="timezone" placeholder="Pacific (PT) — Redmond, WA" />
+        <label>Working hours</label>
+        <input type="text" id="working_hours" placeholder="9:00 AM-6:00 PM PT" />
+        <label>Focus preferences</label>
+        <textarea id="focus_preferences" placeholder="One per line"></textarea>
+        <label>Recurring meetings</label>
+        <textarea id="recurring_meetings" placeholder="One per line"></textarea>
+        <label>Escalation rules</label>
+        <textarea id="escalation_rules" placeholder="One per line"></textarea>
+      </details>
+    </form>
+
+    <h2 style="margin-top:18px">Skills to generate</h2>
+    <div class="wf" id="workflows"></div>
+
+    <div class="actions">
+      <button class="btn primary" id="previewBtn" type="button">Preview</button>
+      <button class="btn good" id="installBtn" type="button">Install to Scout</button>
+      <button class="btn" id="zipBtn" type="button">Download .zip</button>
+    </div>
+    <div class="msg" id="leftMsg"></div>
+  </div>
+
+  <!-- RIGHT: preview + manage -->
+  <div class="right">
+    <h2>Preview</h2>
+    <div id="preview"><div class="empty">Fill in the executive and click <b>Preview</b>.</div></div>
+
+    <div class="manage">
+      <h2>Manage installed skills</h2>
+      <div class="msg info show" id="fsNote"></div>
+      <div class="actions" style="margin-top:0">
+        <button class="btn" id="connectBtn" type="button">Connect Scout skills folder…</button>
+      </div>
+      <div id="installed"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const WORKFLOWS = {{ workflows|tojson }};
+  const SAVED_PERSONAS = {{ personas|tojson }};
+  const SUPABASE_URL = {{ supabase_url|tojson }};
+  const SUPABASE_KEY = {{ supabase_key|tojson }};
+
+  const supportsFS = "showDirectoryPicker" in window;
+  let dirHandle = null;          // granted Scout skills folder
+  let lastResult = null;         // last /api/generate response
+  let mode = "new";
+
+  // ---- helpers ----
+  const $ = (id) => document.getElementById(id);
+  const lines = (id) => ($(id).value || "").split("\n").map(s => s.trim()).filter(Boolean);
+  const val = (id) => ($(id).value || "").trim();
+  const slug = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const esc = (s) => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+  function showMsg(el, text, kind) {
+    el.className = "msg show " + (kind || "info");
+    el.textContent = text;
+  }
+  function hideMsg(el) { el.className = "msg"; }
+
+  // ---- workflow checkboxes ----
+  WORKFLOWS.forEach((w, i) => {
+    const id = "wf_" + w.id;
+    const lab = document.createElement("label");
+    lab.innerHTML = `<input type="checkbox" id="${id}" value="${w.id}" ${i < 4 ? "checked" : ""}/> ${esc(w.label)}`;
+    $("workflows").appendChild(lab);
+  });
+  const selectedWorkflows = () =>
+    WORKFLOWS.map(w => w.id).filter(id => $("wf_" + id).checked);
+
+  // ---- saved persona dropdown ----
+  SAVED_PERSONAS.forEach(p => {
+    const o = document.createElement("option");
+    o.value = p.file; o.textContent = `${p.display_name} — ${p.title}`;
+    $("savedSelect").appendChild(o);
+  });
+
+  // ---- mode toggle ----
+  document.querySelectorAll("#mode button").forEach(b => {
+    b.onclick = () => {
+      mode = b.dataset.mode;
+      document.querySelectorAll("#mode button").forEach(x => x.classList.toggle("on", x === b));
+      $("savedPane").style.display = mode === "saved" ? "block" : "none";
+      $("builder").style.display = mode === "saved" ? "none" : "block";
+    };
+  });
+
+  // ---- build the persona payload from the form ----
+  function buildPersona() {
+    const name = val("display_name");
+    return {
+      id: slug(name) || "exec",
+      display_name: name,
+      title: val("title"),
+      org: val("org"),
+      charter: val("charter"),
+      scope: { process_domains: lines("process_domains"), partner_orgs: lines("partner_orgs") },
+      voice_and_style: { tone: val("tone"), signature_phrases: lines("signature_phrases") },
+      decision_filters: lines("decision_filters"),
+      people: {
+        chief_of_staff: val("chief_of_staff"),
+        executive_assistant: val("executive_assistant"),
+        direct_reports: lines("direct_reports"),
+        key_stakeholders: lines("key_stakeholders"),
+      },
+      cadence: {
+        timezone: val("timezone"), working_hours: val("working_hours"),
+        focus_preferences: lines("focus_preferences"), recurring_meetings: lines("recurring_meetings"),
+      },
+      escalation_rules: lines("escalation_rules"),
+    };
+  }
+
+  function payload() {
+    const wf = selectedWorkflows();
+    if (!wf.length) throw new Error("Pick at least one skill to generate.");
+    if (mode === "saved") {
+      const file = $("savedSelect").value;
+      if (!file) throw new Error("Choose a saved persona.");
+      return { persona: file, workflows: wf };
+    }
+    return { persona_data: buildPersona(), workflows: wf };
+  }
+
+  // ---- preview ----
+  async function generate() {
+    hideMsg($("leftMsg"));
+    let body;
+    try { body = payload(); } catch (e) { showMsg($("leftMsg"), e.message, "err"); return null; }
+    const res = await fetch("/api/generate", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg($("leftMsg"), data.error || "Generation failed.", "err"); return null; }
+    lastResult = data;
+    renderPreview(data);
+    return data;
+  }
+
+  function renderPreview(data) {
+    const items = data.skills.map((s, i) => ({ key: "s" + i, label: s.workflow, valid: s.valid, body: skillPaneHtml(s) }));
+    if (data.automations && data.automations.length) {
+      items.push({ key: "auto", label: "automations", valid: true, body: autoPaneHtml(data.automations) });
+    }
+    const tabs = items.map((it, i) =>
+      `<div class="tab ${i === 0 ? "active" : ""}" data-k="${it.key}">${esc(it.label)}` +
+      `<span class="badge ${it.valid ? "" : "bad"}">${it.valid ? "valid" : "errors"}</span></div>`).join("");
+    const panes = items.map((it, i) =>
+      `<div class="pane ${i === 0 ? "active" : ""}" data-k="${it.key}">${it.body}</div>`).join("");
+    $("preview").innerHTML = `<div class="tabs">${tabs}</div>${panes}`;
+    $("preview").querySelectorAll(".tab").forEach(t => {
+      t.onclick = () => {
+        $("preview").querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === t));
+        $("preview").querySelectorAll(".pane").forEach(p => p.classList.toggle("active", p.dataset.k === t.dataset.k));
+      };
+    });
+  }
+
+  function skillPaneHtml(s) {
+    const errs = s.errors.length ? `<div class="errors">${s.errors.map(e => "• " + esc(e)).join("<br>")}</div>` : "";
+    const warns = s.warnings.length ? `<div class="warnings">${s.warnings.map(w => "• " + esc(w)).join("<br>")}</div>` : "";
+    return `<div class="meta">${esc(s.path)}</div>${errs}${warns}<pre class="skill">${esc(s.content)}</pre>`;
+  }
+  function autoPaneHtml(files) {
+    return files.map(f => `<div class="meta">automations/${esc(f.filename)}</div><pre class="skill">${esc(f.content)}</pre>`).join("");
+  }
+
+  // ---- install via File System Access API ----
+  async function pickSkillsFolder() {
+    dirHandle = await window.showDirectoryPicker({ id: "scout-skills", mode: "readwrite" });
+    return dirHandle;
+  }
+  async function writeFile(dir, name, content) {
+    const fh = await dir.getFileHandle(name, { create: true });
+    const w = await fh.createWritable();
+    await w.write(content); await w.close();
+  }
+  async function installResult(data) {
+    if (!dirHandle) await pickSkillsFolder();
+    for (const s of data.skills) {
+      const sub = await dirHandle.getDirectoryHandle(s.slug, { create: true });
+      await writeFile(sub, "SKILL.md", s.content);
+    }
+    if (data.automations && data.automations.length) {
+      const ad = await dirHandle.getDirectoryHandle("automations", { create: true });
+      for (const f of data.automations) await writeFile(ad, f.filename, f.content);
+    }
+  }
+
+  async function downloadZip() {
+    let body;
+    try { body = payload(); } catch (e) { showMsg($("leftMsg"), e.message, "err"); return; }
+    const res = await fetch("/api/download", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+    if (!res.ok) { const d = await res.json(); showMsg($("leftMsg"), d.error || "Download failed.", "err"); return; }
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "scout-skills.zip"; a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // ---- manage installed skills ----
+  async function listInstalled() {
+    if (!dirHandle) { try { await pickSkillsFolder(); } catch { return; } }
+    const rows = [];
+    for await (const [name, handle] of dirHandle.entries()) {
+      if (handle.kind !== "directory" || name === "automations") continue;
+      let hasSkill = false;
+      try { await handle.getFileHandle("SKILL.md"); hasSkill = true; } catch {}
+      if (hasSkill) rows.push(name);
+    }
+    rows.sort();
+    $("installed").innerHTML = rows.length
+      ? rows.map(n => `<div class="skillrow"><code>${esc(n)}/SKILL.md</code><button data-skill="${esc(n)}">Remove</button></div>`).join("")
+      : `<div class="empty">No skills found in this folder yet.</div>`;
+    $("installed").querySelectorAll("button[data-skill]").forEach(b => {
+      b.onclick = async () => {
+        if (!confirm(`Remove ${b.dataset.skill}/ from your Scout skills folder?`)) return;
+        await dirHandle.removeEntry(b.dataset.skill, { recursive: true });
+        listInstalled();
+      };
+    });
+  }
+
+  // ---- wire buttons ----
+  $("previewBtn").onclick = generate;
+  $("zipBtn").onclick = downloadZip;
+  $("installBtn").onclick = async () => {
+    if (!supportsFS) { showMsg($("leftMsg"), "This browser can't install directly — use Download .zip (Chrome or Edge support one-click install).", "info"); return downloadZip(); }
+    // Folder picker needs the click's transient activation, so require a Preview first
+    // (no network call between the click and showDirectoryPicker).
+    if (!lastResult) { showMsg($("leftMsg"), "Click Preview first, then Install.", "info"); return; }
+    try {
+      await installResult(lastResult);
+      showMsg($("leftMsg"), `Installed ${lastResult.skills.length} skill(s)` + (lastResult.automations.length ? " + automations" : "") + " into your Scout folder.", "ok");
+      listInstalled();
+    } catch (e) {
+      if (e && e.name === "AbortError") return;
+      showMsg($("leftMsg"), "Install failed: " + (e.message || e), "err");
+    }
+  };
+  $("connectBtn").onclick = listInstalled;
+
+  // ---- form fill (load a saved persona back into the builder) ----
+  function setVal(id, v) { const el = $(id); if (el) el.value = v || ""; }
+  function setList(id, arr) { const el = $(id); if (el) el.value = (arr || []).join("\n"); }
+  function fillForm(p) {
+    p = p || {};
+    mode = "new";
+    document.querySelectorAll("#mode button").forEach(x => x.classList.toggle("on", x.dataset.mode === "new"));
+    $("savedPane").style.display = "none"; $("builder").style.display = "block";
+    setVal("display_name", p.display_name); setVal("title", p.title); setVal("org", p.org); setVal("charter", p.charter);
+    const sc = p.scope || {}; setList("process_domains", sc.process_domains); setList("partner_orgs", sc.partner_orgs);
+    const v = p.voice_and_style || {}; setVal("tone", v.tone); setList("signature_phrases", v.signature_phrases);
+    setList("decision_filters", p.decision_filters);
+    const pe = p.people || {}; setVal("chief_of_staff", pe.chief_of_staff); setVal("executive_assistant", pe.executive_assistant);
+    setList("direct_reports", pe.direct_reports); setList("key_stakeholders", pe.key_stakeholders);
+    const c = p.cadence || {}; setVal("timezone", c.timezone); setVal("working_hours", c.working_hours);
+    setList("focus_preferences", c.focus_preferences); setList("recurring_meetings", c.recurring_meetings);
+    setList("escalation_rules", p.escalation_rules);
+  }
+  function clearForm() {
+    ["display_name","title","org","charter","process_domains","partner_orgs","tone","signature_phrases",
+     "decision_filters","chief_of_staff","executive_assistant","direct_reports","key_stakeholders",
+     "timezone","working_hours","focus_preferences","recurring_meetings","escalation_rules"]
+      .forEach(id => { const el = $(id); if (el) el.value = ""; });
+    currentLibId = null;
+  }
+
+  // ---- accounts + persona library (Supabase, RLS-gated) ----
+  const sb = (SUPABASE_URL && SUPABASE_KEY && window.supabase)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  let currentUser = null, currentLibId = null;
+
+  function renderAuth(session) {
+    currentUser = (session && session.user) || null;
+    const bar = $("authbar");
+    if (currentUser) {
+      bar.innerHTML = `<span class="pill">${esc(currentUser.email)}</span><button class="btn" id="signout">Sign out</button>`;
+      $("signout").onclick = () => sb.auth.signOut();
+      $("libraryPanel").style.display = "block";
+      loadLibrary();
+    } else {
+      bar.innerHTML = `<input type="text" id="email" placeholder="you@company.com"/><button class="btn primary" id="signin">Email me a link</button>`;
+      $("signin").onclick = sendMagicLink;
+      $("libraryPanel").style.display = "none";
+    }
+  }
+  async function sendMagicLink() {
+    const email = val("email"); if (!email) { showMsg($("leftMsg"), "Enter your email first.", "info"); return; }
+    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
+    showMsg($("leftMsg"), error ? ("Sign-in failed: " + error.message) : (`Check ${email} for a sign-in link.`), error ? "err" : "ok");
+  }
+  async function loadLibrary() {
+    if (!sb) return;
+    const { data, error } = await sb.from("skillforge_personas")
+      .select("id,name,data,updated_at").order("updated_at", { ascending: false });
+    const box = $("libraryList");
+    if (error) { box.innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
+    box.innerHTML = (data && data.length)
+      ? data.map(r => `<div class="skillrow"><code>${esc(r.name)}</code><span><button class="btn" data-load="${r.id}">Load</button> <button data-del="${r.id}">Delete</button></span></div>`).join("")
+      : `<div class="empty">No saved executives yet — fill the form and Save.</div>`;
+    box.querySelectorAll("button[data-load]").forEach(b => b.onclick = () => {
+      const r = data.find(x => x.id === b.dataset.load);
+      if (r) { fillForm(r.data); currentLibId = r.id; showMsg($("leftMsg"), `Loaded "${r.name}". Edit, then Preview or Install.`, "info"); }
+    });
+    box.querySelectorAll("button[data-del]").forEach(b => b.onclick = async () => {
+      if (!confirm("Delete this executive from your library?")) return;
+      const { error } = await sb.from("skillforge_personas").delete().eq("id", b.dataset.del);
+      if (error) { showMsg($("leftMsg"), "Delete failed: " + error.message, "err"); return; }
+      if (currentLibId === b.dataset.del) currentLibId = null;
+      loadLibrary();
+    });
+  }
+  async function saveCurrent() {
+    if (!sb || !currentUser) { showMsg($("leftMsg"), "Sign in to save to your library.", "info"); return; }
+    let persona; try { persona = buildPersona(); } catch (e) { showMsg($("leftMsg"), e.message, "err"); return; }
+    const name = persona.display_name || "Untitled executive";
+    let res;
+    if (currentLibId) res = await sb.from("skillforge_personas").update({ name, data: persona }).eq("id", currentLibId);
+    else { res = await sb.from("skillforge_personas").insert({ name, data: persona }).select("id").single(); if (!res.error && res.data) currentLibId = res.data.id; }
+    showMsg($("leftMsg"), res.error ? ("Save failed: " + res.error.message) : (`Saved "${name}" to your library.`), res.error ? "err" : "ok");
+    loadLibrary();
+  }
+
+  const _saveBtn = $("saveLibBtn"); if (_saveBtn) _saveBtn.onclick = saveCurrent;
+  const _newBtn = $("newLibBtn"); if (_newBtn) _newBtn.onclick = () => { clearForm(); showMsg($("leftMsg"), "Cleared — building a new executive.", "info"); };
+
+  if (sb) {
+    sb.auth.getSession().then(({ data }) => renderAuth(data.session));
+    sb.auth.onAuthStateChange((_e, session) => renderAuth(session));
+  }
+
+  // ---- FS support note + button state ----
+  if (supportsFS) {
+    showMsg($("fsNote"), "Click below, pick your ~/.copilot/skills folder, and the app reads/writes it directly in your browser.", "info");
+  } else {
+    showMsg($("fsNote"), "Your browser doesn't support in-browser install/manage. Use Download .zip and unzip into ~/.copilot/skills. (Chrome or Edge enable one-click install.)", "info");
+    $("installBtn").textContent = "Download .zip (install unsupported)";
+    $("connectBtn").disabled = true;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+## Who supports {{ persona.first_name }}
+{% if persona.people.chief_of_staff or persona.people.executive_assistant or persona.people.direct_reports or persona.people.key_stakeholders or persona.delegates %}
+{% if persona.people.chief_of_staff %}- **Chief of staff:** {{ persona.people.chief_of_staff }}
+{% endif %}{% if persona.people.executive_assistant %}- **Executive assistant:** {{ persona.people.executive_assistant }}
+{% endif %}{% if persona.people.direct_reports %}- **Direct reports:** {{ persona.people.direct_reports | join("; ") }}
+{% endif %}{% if persona.people.key_stakeholders %}- **Key stakeholders:** {{ persona.people.key_stakeholders | join("; ") }}
+{% endif %}{% if persona.delegates %}- **Delegate work to:**
+{% for d in persona.delegates %}  - {{ d.get("name") }}{% if d.get("domains") %} — {{ d.get("domains") | join(", ") }}{% endif %}
+{% endfor %}{% endif %}{% else %}
+Support team not yet on file. Use **people search** and the Microsoft 365 org chart to identify {{ persona.first_name }}'s chief of staff, executive assistant, direct reports, and delegates — then confirm with {{ persona.first_name }} before routing work to them.
+{% endif -%}
+{%- if persona.cadence.timezone or persona.cadence.working_hours or persona.cadence.focus_preferences or persona.cadence.recurring_meetings %}
+
+## {{ persona.first_name }}'s cadence & boundaries
+{% if persona.cadence.timezone %}- **Time zone:** {{ persona.cadence.timezone }}
+{% endif %}{% if persona.cadence.working_hours %}- **Working hours:** {{ persona.cadence.working_hours }}
+{% endif %}{% if persona.cadence.focus_preferences %}{% for f in persona.cadence.focus_preferences %}- {{ f }}
+{% endfor %}{% endif %}{% if persona.cadence.recurring_meetings %}- **Recurring:** {{ persona.cadence.recurring_meetings | join("; ") }}
+{% endif %}{% endif -%}
+{%- if persona.escalation_rules %}
+
+## Escalation rules {{ persona.first_name }} expects
+{% for r in persona.escalation_rules %}- {{ r }}
+{% endfor %}{% endif -%}
+{%- if persona.provenance.source or persona.provenance.confirmed or persona.provenance.inferred or persona.provenance.tbd %}
+
+## Grounding & provenance
+
+Persona source: {{ persona.provenance.source or "unspecified" }}.
+{% if persona.provenance.confirmed %}
+**Confirmed:** {{ persona.provenance.confirmed | join(", ") }}.
+{% endif %}{% if persona.provenance.inferred %}
+**Inferred — verify before stating as fact:** {{ persona.provenance.inferred | join(", ") }}.
+{% endif %}{% if persona.provenance.tbd %}
+**TBD — fill via people search / WorkIQ / `m365_*`, then confirm with {{ persona.first_name }}:** {{ persona.provenance.tbd | join(", ") }}.
+{% endif %}
+Treat inferred and TBD items as drafts — never present them in {{ persona.first_name }}'s voice as established fact without confirming first.
+{% endif %}

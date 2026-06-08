@@ -1,0 +1,143 @@
+---
+name: {{ skill_slug }}
+description: |
+  Runs daily and weekly inbox + calendar triage for {{ persona.display_name }} ({{ persona.title }}, {{ persona.org }}). Use when {{ persona.first_name }} asks for "morning digest," "what needs me today," "triage my inbox," "what's on my plate this week," or schedules a recurring digest. Surfaces only items that require {{ persona.first_name }}'s decision, time, signature, or escalation — and proposes delegations for everything else. Protects deep-work time and partner-org commitments.
+---
+
+# {{ skill_title }}
+
+You are triaging the day and the inbox for **{{ persona.display_name }}**, **{{ persona.title }}**, {{ persona.org }}.
+
+## When to use this skill
+
+Activate when {{ persona.first_name }} (or a scheduled automation on his behalf) asks for any of:
+
+- "Morning digest" / "What's on today?"
+- "Triage my inbox"
+- "What needs me this week?"
+- "What can I cut from my calendar?"
+- "Prep for my 1:1 with \<name\>"
+- Any recurring digest configured by Scout automations
+
+Do NOT use this skill to draft outbound replies (hand off to the comms skill once {{ persona.first_name }} picks a thread), or to write long briefings (hand off to the briefing skill).
+
+## Triage philosophy — {{ persona.first_name }}'s filters
+
+Every item must pass through these filters, in order. Items that fail are demoted or delegated.
+
+1. **Does this need {{ persona.first_name }}'s decision, signature, or escalation?** If no, it does not surface to the top of the digest.
+2. **Which process domain does this touch?** ({{ persona.process_domains | join(", ") }}). Items outside these domains are demoted unless they involve a direct report or named partner-org leader.
+3. **Is there a compliance or control implication** (SOX, Trade, Tax, Privacy, Anticorruption, Payments)? If yes, escalate priority — these never wait.
+4. **Is there a KPI exception or threshold breach?** If yes, surface with the number.
+5. **Is this from a partner-org leader** in {{ persona.partner_orgs | join(", ") }}? If yes, time-box a response.
+6. **Can it be delegated?** Propose a specific person and a draft handoff line.
+
+{% include "_persona_grounding.md.j2" %}
+
+## Required scans
+
+Each run, use **WorkIQ** for the cross-service sweep ("what needs {{ persona.first_name }} across mail, Teams, calendar, and docs since the last digest"), then confirm specifics with the `m365_*` tools:
+
+1. **Mail (`m365_*`)**
+   - Unread messages since last digest.
+   - Flagged / @-mentioned messages.
+   - Messages from CVP, C-suite, board contacts, or named partner-org leaders (resolve senders with **people search**).
+   - Messages containing compliance keywords: SOX, audit, control, privacy, trade, tax, anti-corruption, payment, regulator.
+   - Messages with explicit asks ("can you," "please review," "approve," "sign," "decide").
+2. **Teams (`m365_*`)**
+   - @mentions and replies in channels {{ persona.first_name }} owns or leads.
+   - DMs from direct reports and partner-org leaders.
+   - Operations leadership channels.
+3. **Calendar (`m365_*`, today + next 5 business days)**
+   - Conflicts and double-bookings.
+   - Meetings without an agenda or pre-read.
+   - Meetings where {{ persona.first_name }} is the decision-maker but no decision is queued.
+   - External or partner-facing meetings — flag prep needs.
+   - Blocks of \< 30 minutes between meetings — flag as fragmentation risk.
+4. **OneDrive / SharePoint (`m365_*`)**
+   - Documents shared with {{ persona.first_name }} since last digest where his comment or approval is pending.
+
+## Output format — the digest
+
+Save to `{{ "{" }}workspace{{ "}" }}/digests/{{ "{" }}YYYY-MM-DD{{ "}" }}-digest.md` and surface inline:
+
+```
+# Digest for {{ persona.first_name }} — <YYYY-MM-DD>, <morning | end-of-day | weekly>
+
+## Top of mind (≤ 5 items, only what needs you today)
+For each:
+- **Item:** <one-line summary>
+- **Why it's here:** <decision needed / signature / compliance / KPI breach / CVP ask>
+- **Suggested action:** <reply | approve | decline | delegate to <name> | 15-min block>
+- **Deadline:** <date or "today">
+- **Link:** <url to the thread, doc, or event>
+
+## Compliance & control flags
+Anything touching SOX, Trade, Tax, Privacy, Anticorruption, Payments. If none: "No control flags this cycle."
+
+## KPI exceptions
+Any KPI in {{ persona.process_domains | join(" / ") }} that breached a threshold since last digest. Cite the dashboard or source.
+
+## Calendar — today (or next 5 days for weekly)
+| Time | Meeting | Your role | Prep status | Recommendation |
+|------|---------|-----------|-------------|----------------|
+
+Recommendations are one of: ATTEND / DELEGATE TO \<name\> / DECLINE WITH NOTE / SHORTEN TO 25 MIN / REQUEST AGENDA / NO ACTION.
+
+## Partner-org pulse
+One line per partner org with anything new from a named leader: {{ persona.partner_orgs | join(", ") }}.
+
+## Delegate now (proposed handoffs)
+| Item | Suggested owner | Draft handoff line |
+|------|----------------|---------------------|
+
+## Read later (FYI bucket, ≤ 10 items)
+Bulleted, link-only. No commentary unless one stands out for tomorrow.
+
+## What you can cut today
+Specific suggestions to reclaim 30–90 minutes of focus time. Name the meeting or thread and the rationale.
+```
+
+## Run this as a Scout automation
+
+This skill is built to run unattended. Set it up in Scout's **Automations** panel (New automation → Schedule trigger). Suggested presets:
+
+| Name | Schedule | Prompt | Scope |
+|------|----------|--------|-------|
+| {{ persona.first_name }} — morning digest | Weekdays 6:30 AM PT | "Run my morning triage digest." | Last 12 hours |
+| {{ persona.first_name }} — end-of-day digest | Weekdays 5:30 PM PT | "Run my end-of-day triage; emphasize tomorrow's prep." | Since morning digest |
+| {{ persona.first_name }} — weekly look-ahead | Sunday 5:00 PM PT | "Run my weekly triage." | Next 5 business days; partner-org commitments + KPI reviews |
+
+### Heartbeat-safe behavior
+
+When this runs in **Heartbeat** mode or any unattended automation (no one present to approve):
+
+- Write the digest to the workspace and surface it; **do not send** mail or Teams messages, decline meetings, or take any approval-gated action.
+- Treat tentative calendar events as busy (the conservative read).
+- Keep any outbound content generic — never put private or labeled detail into a message body. Link to the source instead.
+- If an item truly needs a send/decline, list it under "Top of mind" with the action queued for {{ persona.first_name }} to approve interactively.
+
+## Voice rules
+
+Write the digest in {{ persona.first_name }}'s internal voice — direct, calm, KPI-anchored. He scans before he reads; use bold sparingly to anchor the eye on names, KPIs, and deadlines. Avoid filler ("hope this helps," "let me know"). Use his framing pattern: outcome → lever → partners → KPI.
+
+{% include "_scout_platform.md.j2" %}
+## Quality bar — self-check before delivering
+
+- [ ] No more than 5 items in "Top of mind."
+- [ ] Every "Top of mind" item has a deadline and a suggested action.
+- [ ] Compliance and KPI sections are present (even if "none this cycle").
+- [ ] Calendar table covers the right window for the cadence.
+- [ ] At least one specific "cut" recommendation in "What you can cut today" (unless calendar is genuinely light).
+- [ ] No labeled/Confidential content pasted into the digest body — summarized and linked instead.
+- [ ] If run unattended, no approval-gated actions taken; queued for {{ persona.first_name }} instead.
+- [ ] No item assumes {{ persona.first_name }} will do the work himself if a direct report or partner-org owner is appropriate.
+
+If any check fails, revise before delivering.
+
+## Privacy and boundaries
+
+- Reading Confidential or labeled mail/docs elevates the session's sensitivity level — never write that content to the plain-text digest or a Teams channel. Summarize and link.
+- Never include the full body of confidential emails in the digest — link to the thread and summarize.
+- For compliance-flagged items, do not paste regulator names, case numbers, or audit findings into the digest body. Use "compliance item — see link" and protect the underlying source.
+- Never auto-decline or auto-reply without explicit approval. Recommend only.

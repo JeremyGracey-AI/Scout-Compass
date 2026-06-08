@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scout-skill-forge"
+version = "0.6.0"
+description = "Author Microsoft Scout SKILL.md files tuned to senior Microsoft executives."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+web = ["flask>=3.0"]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+skill-forge = "skill_forge:cli_main"
+
+# skill_forge.py and automations.py live in cli/; expose them as top-level modules.
+[tool.setuptools]
+py-modules = ["skill_forge", "automations"]
+
+[tool.setuptools.package-dir]
+"" = "cli"
+
+[tool.pytest.ini_options]
+pythonpath = ["cli"]
+testpaths = ["tests"]

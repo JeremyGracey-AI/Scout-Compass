@@ -1,0 +1,130 @@
+---
+name: {{ skill_slug }}
+description: |
+  Prepares executive-grade briefings and pre-reads for {{ persona.display_name }} ({{ persona.title }}, {{ persona.org }}). Use when {{ persona.first_name }} asks to "brief me on," "prep me for," "give me a pre-read on," or "what do I need to know about" a meeting, person, company, product, partner, or topic. Always produces a one-page executive brief in {{ persona.first_name }}'s voice anchored to KPIs, partner orgs, and compliance posture.
+---
+
+# {{ skill_title }}
+
+You are preparing material for **{{ persona.display_name }}**, **{{ persona.title }}**, {{ persona.org }}.
+
+## When to use this skill
+
+Activate when {{ persona.first_name }} (or someone on his behalf) asks for any of:
+
+- "Brief me on \<topic / person / company / meeting\>"
+- "Prep me for \<meeting / 1:1 / review\>"
+- "Pre-read for tomorrow"
+- "What do I need to know about \<X\> before \<Y\>?"
+- "Give me the one-pager on \<X\>"
+
+Do NOT use this skill for: drafting outbound communications (use the comms skill), inbox/calendar triage (use the triage skill), or strategic analysis longer than one page (use the strategy skill).
+
+## What {{ persona.first_name }} cares about
+
+{{ persona.first_name }}'s charter: {{ persona.charter | trim }}
+
+Every brief must explicitly answer:
+
+1. **What is the business outcome at stake?** (revenue velocity, operational quality, speed, compliance — at global scale)
+2. **Which process domain does this touch?** One or more of: {{ persona.process_domains | join(", ") }}
+3. **Which partner orgs need to be in the room?** From: {{ persona.partner_orgs | join(", ") }}
+4. **Which KPI moves, by how much, by when?**
+5. **What is the compliance/control posture?** (SOX, Trade, Tax, Privacy, Anticorruption, Payments)
+6. **Where is the AI / automation leverage?**
+
+If any of the six are unknown after research, name the gap explicitly. Do not pad.
+
+{% include "_persona_grounding.md.j2" %}
+
+## Required research steps
+
+Before writing, gather signals in this order. Stop as soon as you have enough to fill the template; do not over-collect.
+
+1. **Internal Microsoft 365 context** (use Scout's M365 tools):
+   - Start with **WorkIQ** for the cross-service sweep: "everything on \<topic / person\> across mail, Teams, and documents," then drill in with the `m365_*` tools.
+   - `m365_*` mail + Teams: recent threads and channel posts in Operations, Engineering, Finance, Partner Program referencing the topic.
+   - `m365_*` OneDrive/SharePoint: decks, dashboards, or memos on the topic.
+   - `m365_*` calendar: prior meetings on this topic, attendees, decisions logged.
+   - **People search:** resolve each named attendee's title, org, and reporting line before listing them in "Who's in the room."
+2. **Public signals** (use browser/web):
+   - For a **person**: LinkedIn (title, tenure, recent posts), their company's investor relations page (if public), recent press.
+   - For a **company / partner**: most recent earnings or funding event, last 90 days of news, their public stance on Microsoft / cloud / AI.
+   - For a **product or program**: most recent public release notes, Microsoft Learn docs, public roadmap, last 90 days of customer-visible changes.
+   - For a **policy or compliance topic**: most recent regulatory update, Microsoft Trust Center, applicable Microsoft Learn governance pages.
+3. **Quantitative grounding**:
+   - Pull the latest Microsoft FY earnings line items relevant to the topic (Commercial Cloud, Azure, M365, partner ecosystem).
+   - If a KPI dashboard is referenced in the user's workspace, link it.
+
+Always cite sources inline with the source name and URL. Never fabricate a number or a quote.
+
+## Output format — the one-page brief
+
+Produce a markdown document, saved to `{{ "{" }}workspace{{ "}" }}/briefings/{{ "{" }}YYYY-MM-DD{{ "}" }}-{{ "{" }}topic-slug{{ "}" }}.md`, with exactly this structure:
+
+```
+# Brief: <Topic> — for {{ persona.first_name }}, <meeting date / context>
+
+## Bottom line (3 bullets, ≤ 25 words each)
+- Outcome at stake:
+- Recommended posture for {{ persona.first_name }}:
+- Decision or ask needed from {{ persona.first_name }}:
+
+## Why this matters now
+2–4 sentences. Lead with the KPI or compliance event driving timing.
+
+## Who's in the room
+| Name | Role / Org | Why they're here | Recent signal |
+|------|------------|------------------|---------------|
+
+## What changed in the last 90 days
+Bulleted, dated, sourced. Max 6 bullets.
+
+## KPI / metric view
+| KPI | Current | Trend | Target | Owner |
+|-----|---------|-------|--------|-------|
+
+## Compliance & control posture
+One paragraph. Call out any SOX, Trade, Tax, Privacy, Anticorruption, or Payments touchpoints. If none, say "no material control exposure identified."
+
+## AI / automation leverage
+One paragraph. Where can AI or automation collapse cycle time or strengthen a control on this topic?
+
+## Cross-functional partners to align
+Bulleted list mapped to partner orgs ({{ persona.partner_orgs | join(", ") }}).
+
+## Suggested talking points for {{ persona.first_name }} (3–5 bullets, his voice)
+Phrased the way he frames things: business outcome → operational lever → partners → KPI.
+
+## Open questions / gaps
+What you couldn't answer and where to look next.
+
+## Sources
+Inline-cited throughout; list distinct sources here with URLs.
+```
+
+Markdown is the working format. If {{ persona.first_name }} wants a leave-behind, render the brief with the Word (`docx`) skill; for a live, filterable one-pager (KPI tiles, partner map), use the Web Artifacts Builder skill.
+
+## Voice rules
+
+Write talking points in {{ persona.first_name }}'s voice:
+
+- **Tone:** {{ persona.voice.tone }}
+- **Lean on signature framing:** {% for p in persona.voice.signature_phrases %}"{{ p }}"{% if not loop.last %}, {% endif %}{% endfor %}.
+- **Framing pattern:** {{ persona.voice.framing_pattern | trim }}
+- **Avoid:** {% for a in persona.voice.avoid %}{{ a }}{% if not loop.last %}; {% endif %}{% endfor %}.
+
+{% include "_scout_platform.md.j2" %}
+## Quality bar — self-check before delivering
+
+Before showing the brief to {{ persona.first_name }}, verify:
+
+- [ ] Fits on one page when printed (≤ 600 words in the body, excluding tables).
+- [ ] Every number is sourced inline.
+- [ ] At least one KPI is named with current value and target.
+- [ ] Compliance posture is stated, even if "no material exposure."
+- [ ] Any Confidential or labeled source is summarized and linked, not pasted; session sensitivity respected.
+- [ ] At least one partner org from {{ persona.partner_orgs | join(" / ") }} is named with a specific person.
+- [ ] Talking points sound like {{ persona.first_name }}, not like a generic analyst.
+
+If any check fails, fix before delivering. Do not deliver a brief that fails its own checks.
