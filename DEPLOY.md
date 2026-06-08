@@ -1,4 +1,4 @@
-# Deploy runbook — Scout Skill Forge web app
+# Deploy runbook — Scout Compass web app
 
 The web app (`web/app.py` + `web/templates/index.html`) is a stateless renderer: it
 generates skills/automations from a posted persona and **stores nothing**. Accounts and the
@@ -17,7 +17,9 @@ Browser ──(persona JSON)──▶ Flask /api/generate ──▶ rendered SKI
 
 - Project: `doghouse-bubbles` (`ivysnobxweftdmvfevqj`), region `us-east-1`.
 - Table: `public.skillforge_personas` with RLS — each row is readable/writable only by its
-  owner (`auth.uid() = user_id`, default `user_id = auth.uid()`).
+  owner (`auth.uid() = user_id`, default `user_id = auth.uid()`). (The table keeps its
+  original name after the Scout Compass rebrand, so the live deployment and saved personas
+  keep working without a data migration.)
 - Frontend config (public, RLS-gated):
   - `SUPABASE_URL = https://ivysnobxweftdmvfevqj.supabase.co`
   - `SUPABASE_ANON_KEY = sb_publishable_...` (publishable key)

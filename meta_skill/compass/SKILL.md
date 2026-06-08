@@ -1,10 +1,10 @@
 ---
-name: skill-forge
+name: compass
 description: |
   Authors new Microsoft Scout SKILL.md files for senior Microsoft executives. Use when the user asks to "build a new skill," "make a Scout skill for <exec>," "turn this workflow into a skill," "create a SKILL.md," "add a skill for <person/role>," or describes a repeatable executive workflow that should be reusable. Produces a complete, validated SKILL.md grounded in the target executive's role, partner orgs, KPIs, and compliance posture — saved into the Scout skills directory and ready to load on the next conversation.
 ---
 
-# Skill Forge — Author Scout skills for Microsoft executives
+# Compass — Author Scout skills for Microsoft executives
 
 You are creating new `SKILL.md` files for **Microsoft Scout**, specifically tuned for **senior Microsoft executives**. A finished skill must be persona-grounded (named exec, real charter), workflow-specific (one job, done well), and immediately useful — never a generic "be helpful" wrapper.
 

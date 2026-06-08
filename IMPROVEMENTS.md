@@ -1,4 +1,4 @@
-# Scout Skill Forge — Improvement Plan
+# Scout Compass — Improvement Plan
 
 Goal: make this tool produce `SKILL.md` files that are **personal** (grounded in a real
 executive's role and data) and **useful** (tied to what Microsoft Scout actually does)
@@ -31,9 +31,9 @@ the **only required field is `description`**; the skill's *name is the folder na
 example has no `name:` key at all.
 
 Where it's wrong today:
-- `cli/skill_forge.py` → `validate_skill_md()` errors when `name` is missing.
+- `cli/compass.py` → `validate_skill_md()` errors when `name` is missing.
 - `README.md` → "SKILL.md spec used here" says `name` is **required** and "matches parent folder."
-- `meta_skill/skill-forge/SKILL.md` → frontmatter rules + validation checklist require `name`.
+- `meta_skill/compass/SKILL.md` → frontmatter rules + validation checklist require `name`.
 
 Fix:
 - Require only `description`. Treat `name` as optional.
@@ -81,7 +81,7 @@ meta-skill teaches all of it; examples regenerated and validated.
   not just markdown — e.g. a briefing can render an HTML dashboard, a strategy memo a Word doc.
 
 Files: `templates/*.j2` (research steps, output format, compliance sections), plus matching
-guidance in `meta_skill/skill-forge/SKILL.md`.
+guidance in `meta_skill/compass/SKILL.md`.
 
 ### P3 — Reliability — ✅ done 2026-06-07
 Made the quality bar real and the tool repeatable. Validator now returns a

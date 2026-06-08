@@ -1,4 +1,4 @@
-"""Tests for skill_forge: validator rules, persona schema, and render round-trip.
+"""Tests for compass: validator rules, persona schema, and render round-trip.
 
 Run with: pytest  (pyproject sets pythonpath = ["cli"]).
 """
@@ -9,7 +9,7 @@ import textwrap
 import pytest
 
 import automations as auto
-import skill_forge as sf
+import compass as sf
 
 
 # --------------------------------------------------------------------------- #
