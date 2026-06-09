@@ -76,6 +76,54 @@
   #authbar { margin-left: auto; display: flex; gap: 8px; align-items: center; }
   #authbar input { width: 190px; }
   #libraryPanel { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  /* skills picker + presets + catalog + installed manager */
+  .skillshead { display: flex; align-items: baseline; justify-content: space-between; margin: 18px 0 10px; }
+  .skillshead h2 { margin: 0; }
+  .link { background: none; border: 0; color: var(--accent); cursor: pointer; font-size: 12.5px; padding: 0; }
+  .link:hover { text-decoration: underline; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .preset { background: var(--panel2); border: 1px solid var(--line); color: var(--ink); border-radius: 999px;
+    padding: 5px 11px; cursor: pointer; font-size: 12px; }
+  .preset:hover { border-color: var(--accent); }
+  .pickbar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .pickbar .spacer { flex: 1; }
+  .wfgroup { margin-bottom: 12px; }
+  .wfgroup-h { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-dim); margin: 8px 0 6px; }
+  .wfcard { display: flex; gap: 9px; align-items: flex-start; padding: 9px 11px; margin: 0 0 6px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 9px; cursor: pointer; }
+  .wfcard:hover { border-color: var(--accent); }
+  .wfcard input { margin-top: 2px; }
+  .wfcard-b { min-width: 0; }
+  .wfcard-t { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+  .wfcard-d { color: var(--ink-dim); font-size: 12px; margin: 2px 0 5px; }
+  .wfcard-c { display: flex; flex-wrap: wrap; gap: 4px; }
+  .rbadge { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 999px;
+    background: rgba(108,224,160,.16); color: var(--good); text-transform: none; letter-spacing: 0; }
+  .chip { font-size: 10.5px; color: var(--ink-dim); background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 999px; padding: 1px 7px; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center;
+    justify-content: center; padding: 24px; z-index: 50; }
+  .modal-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; width: min(760px, 100%);
+    max-height: 84vh; overflow: auto; padding: 18px 20px; }
+  .modal-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+  .cat-h { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-dim); margin: 14px 0 8px; }
+  .cat-item { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; margin-bottom: 8px; background: var(--panel2); }
+  .cat-t { font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+  .cat-d { color: var(--ink); font-size: 12.5px; margin: 3px 0 6px; }
+  .cat-trig { font-size: 11.5px; color: var(--ink-dim); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .instgroup { margin-bottom: 12px; }
+  .instgroup-h { font-size: 12px; font-weight: 600; color: var(--ink); margin: 6px 0; display: flex; align-items: center; gap: 8px; text-transform: capitalize; }
+  .skillrow.inst { align-items: flex-start; }
+  .inst-main { min-width: 0; }
+  .inst-main code { font-size: 12.5px; }
+  .inst-desc { display: block; color: var(--ink-dim); font-size: 11.5px; margin-top: 3px; }
+  .inst-act { display: flex; gap: 6px; flex-shrink: 0; }
+  .mini { border: 1px solid var(--line); background: var(--panel2); color: var(--ink); border-radius: 6px; padding: 4px 9px; cursor: pointer; font-size: 12px; }
+  .mini.danger { border-color: rgba(255,107,107,.4); color: #ffb1b1; background: transparent; }
+  .status { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; margin-left: 7px; background: var(--panel2); color: var(--ink-dim); }
+  .status.ok { background: rgba(108,224,160,.16); color: var(--good); }
+  .status.warn { background: rgba(255,196,77,.16); color: var(--warn); }
+  .status.bad { background: rgba(255,107,107,.16); color: var(--bad); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -154,8 +202,18 @@
       </details>
     </form>
 
-    <h2 style="margin-top:18px">Skills to generate</h2>
-    <div class="wf" id="workflows"></div>
+    <div class="skillshead">
+      <h2>Skills to generate</h2>
+      <button class="link" id="browseBtn" type="button">Browse archetypes ↗</button>
+    </div>
+    <div class="presets" id="presets"></div>
+    <div class="pickbar">
+      <span class="pill" id="pickCount">0 skills selected</span>
+      <span class="spacer"></span>
+      <button class="link" id="selAll" type="button">Select all</button>
+      <button class="link" id="selNone" type="button">Clear</button>
+    </div>
+    <div id="workflows"></div>
 
     <div class="actions">
       <button class="btn primary" id="previewBtn" type="button">Preview</button>
@@ -182,8 +240,19 @@
   </div>
 </div>
 
+<div id="modal" class="modal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="modalTitle" style="margin:0">Skill archetypes</h2>
+      <button class="link" id="modalClose" type="button">Close ✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
 <script>
   const WORKFLOWS = {{ workflows|tojson }};
+  const PRESETS = {{ presets|tojson }};
   const SAVED_PERSONAS = {{ personas|tojson }};
   const SUPABASE_URL = {{ supabase_url|tojson }};
   const SUPABASE_KEY = {{ supabase_key|tojson }};
@@ -206,15 +275,87 @@
   }
   function hideMsg(el) { el.className = "msg"; }
 
-  // ---- workflow checkboxes ----
-  WORKFLOWS.forEach((w, i) => {
-    const id = "wf_" + w.id;
-    const lab = document.createElement("label");
-    lab.innerHTML = `<input type="checkbox" id="${id}" value="${w.id}" ${i < 4 ? "checked" : ""}/> ${esc(w.label)}`;
-    $("workflows").appendChild(lab);
-  });
+  // ---- modal (archetype catalog + installed-skill preview) ----
+  function openModal(title, html) {
+    $("modalTitle").textContent = title;
+    $("modalBody").innerHTML = html;
+    $("modal").style.display = "flex";
+  }
+  $("modalClose").onclick = () => { $("modal").style.display = "none"; };
+  $("modal").onclick = (e) => { if (e.target.id === "modal") $("modal").style.display = "none"; };
+
+  // ---- skills picker (grouped cards) + presets + catalog ----
   const selectedWorkflows = () =>
-    WORKFLOWS.map(w => w.id).filter(id => $("wf_" + id).checked);
+    WORKFLOWS.map(w => w.id).filter(id => { const c = $("wf_" + id); return c && c.checked; });
+
+  function groupByCategory(list) {
+    const groups = {};
+    list.forEach(w => { const c = w.category || "Other"; (groups[c] = groups[c] || []).push(w); });
+    return groups;
+  }
+  function triggerChips(w, limit) {
+    const ts = w.triggers || [];
+    return (limit ? ts.slice(0, limit) : ts).map(t => `<span class="chip">"${esc(t)}"</span>`).join(" ");
+  }
+  function recurringBadge(w) {
+    return w.recurring ? `<span class="rbadge" title="Pairs with a Scout automation">recurring</span>` : "";
+  }
+  function wfCardHtml(w) {
+    return `<label class="wfcard">
+      <input type="checkbox" id="wf_${esc(w.id)}" value="${esc(w.id)}"/>
+      <span class="wfcard-b">
+        <span class="wfcard-t">${esc(w.label)} ${recurringBadge(w)}</span>
+        <span class="wfcard-d">${esc(w.blurb || "")}</span>
+        <span class="wfcard-c">${triggerChips(w, 3)}</span>
+      </span>
+    </label>`;
+  }
+  function renderPicker() {
+    const groups = groupByCategory(WORKFLOWS);
+    $("workflows").innerHTML = Object.entries(groups).map(([cat, ws]) =>
+      `<div class="wfgroup"><div class="wfgroup-h">${esc(cat)}</div>${ws.map(wfCardHtml).join("")}</div>`
+    ).join("");
+    $("workflows").querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = updateCount);
+  }
+  function updateCount() {
+    const n = selectedWorkflows().length;
+    $("pickCount").textContent = `${n} ${n === 1 ? "skill" : "skills"} selected`;
+  }
+  function applySelection(ids) {
+    const set = new Set(ids);
+    WORKFLOWS.forEach(w => { const cb = $("wf_" + w.id); if (cb) cb.checked = set.has(w.id); });
+    updateCount();
+  }
+  function renderPresets() {
+    $("presets").innerHTML = PRESETS.map(p =>
+      `<button class="preset" type="button" data-p="${esc(p.id)}" title="${esc(p.description)}">${esc(p.label)}</button>`
+    ).join("");
+    $("presets").querySelectorAll("button[data-p]").forEach(b => b.onclick = () => {
+      const p = PRESETS.find(x => x.id === b.dataset.p);
+      if (!p) return;
+      applySelection(p.workflows);
+      showMsg($("leftMsg"), `Preset "${p.label}" — ${p.workflows.length} skills selected.`, "info");
+    });
+  }
+  function renderCatalog() {
+    const groups = groupByCategory(WORKFLOWS);
+    const html = Object.entries(groups).map(([cat, ws]) =>
+      `<h3 class="cat-h">${esc(cat)}</h3>` + ws.map(w =>
+        `<div class="cat-item">
+          <div class="cat-t">${esc(w.label)} ${recurringBadge(w)}</div>
+          <div class="cat-d">${esc(w.blurb || "")}</div>
+          <div class="cat-trig">Activates on: ${triggerChips(w)}</div>
+        </div>`).join("")
+    ).join("");
+    openModal("Skill archetypes", html);
+  }
+
+  renderPresets();
+  renderPicker();
+  applySelection(["briefing", "comms", "triage", "strategy"]);   // sensible default
+  $("browseBtn").onclick = renderCatalog;
+  $("selAll").onclick = () => applySelection(WORKFLOWS.map(w => w.id));
+  $("selNone").onclick = () => applySelection([]);
 
   // ---- saved persona dropdown ----
   SAVED_PERSONAS.forEach(p => {
@@ -375,26 +516,71 @@
   }
 
   // ---- manage installed skills ----
-  async function listInstalled() {
-    if (!dirHandle) { try { await pickSkillsFolder(); } catch { return; } }
-    const rows = [];
+  function execOf(slug) { const i = slug.indexOf("-"); return i > 0 ? slug.slice(0, i) : slug; }
+  function safeId(s) { return s.replace(/[^a-z0-9]/gi, "_"); }
+  function skillDescription(text) {
+    const fm = text.match(/^---\s*\n([\s\S]*?)\n---/);
+    if (!fm) return "";
+    const dm = fm[1].match(/description:\s*\|?\s*\n?([\s\S]*?)(?:\n[A-Za-z0-9_]+:|$)/);
+    return dm ? dm[1].replace(/\s+/g, " ").trim() : "";
+  }
+  async function readInstalled() {
+    const out = [];
     for await (const [name, handle] of dirHandle.entries()) {
       if (handle.kind !== "directory" || name === "automations") continue;
-      let hasSkill = false;
-      try { await handle.getFileHandle("SKILL.md"); hasSkill = true; } catch {}
-      if (hasSkill) rows.push(name);
+      try {
+        const fh = await handle.getFileHandle("SKILL.md");
+        out.push({ name, text: await (await fh.getFile()).text() });
+      } catch {}
     }
-    rows.sort();
-    $("installed").innerHTML = rows.length
-      ? rows.map(n => `<div class="skillrow"><code>${esc(n)}/SKILL.md</code><button data-skill="${esc(n)}">Remove</button></div>`).join("")
-      : `<div class="empty">No skills found in this folder yet.</div>`;
-    $("installed").querySelectorAll("button[data-skill]").forEach(b => {
-      b.onclick = async () => {
-        if (!confirm(`Remove ${b.dataset.skill}/ from your Scout skills folder?`)) return;
-        await dirHandle.removeEntry(b.dataset.skill, { recursive: true });
-        listInstalled();
-      };
+    out.sort((a, b) => a.name.localeCompare(b.name));
+    return out;
+  }
+  function instRowHtml(s) {
+    const d = skillDescription(s.text);
+    const short = d.length > 150 ? d.slice(0, 150) + "…" : d;
+    return `<div class="skillrow inst">
+      <span class="inst-main"><code>${esc(s.name)}</code><span class="status" id="st_${safeId(s.name)}">checking…</span>
+        <span class="inst-desc">${esc(short)}</span></span>
+      <span class="inst-act">
+        <button class="mini" data-prev="${esc(s.name)}">Preview</button>
+        <button class="mini danger" data-skill="${esc(s.name)}">Remove</button>
+      </span>
+    </div>`;
+  }
+  async function validateInstalled(s) {
+    const el = $("st_" + safeId(s.name));
+    if (!el) return;
+    try {
+      const res = await fetch("/api/validate", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: s.text, slug: s.name }),
+      });
+      const r = await res.json();
+      if (r.valid && !r.warnings.length) { el.className = "status ok"; el.textContent = "valid"; }
+      else if (r.valid) { el.className = "status warn"; el.textContent = `${r.warnings.length} warning${r.warnings.length === 1 ? "" : "s"}`; el.title = r.warnings.join("\n"); }
+      else { el.className = "status bad"; el.textContent = `${r.errors.length} error${r.errors.length === 1 ? "" : "s"}`; el.title = r.errors.join("\n"); }
+    } catch { el.className = "status"; el.textContent = "—"; }
+  }
+  async function listInstalled() {
+    if (!dirHandle) { try { await pickSkillsFolder(); } catch { return; } }
+    const skills = await readInstalled();
+    if (!skills.length) { $("installed").innerHTML = `<div class="empty">No skills found in this folder yet.</div>`; return; }
+    const groups = {};
+    skills.forEach(s => { const e = execOf(s.name); (groups[e] = groups[e] || []).push(s); });
+    $("installed").innerHTML = Object.entries(groups).map(([exec, items]) =>
+      `<div class="instgroup"><div class="instgroup-h">${esc(exec)} <span class="pill">${items.length}</span></div>${items.map(instRowHtml).join("")}</div>`
+    ).join("");
+    $("installed").querySelectorAll("button[data-skill]").forEach(b => b.onclick = async () => {
+      if (!confirm(`Remove ${b.dataset.skill}/ from your Scout skills folder?`)) return;
+      await dirHandle.removeEntry(b.dataset.skill, { recursive: true });
+      listInstalled();
     });
+    $("installed").querySelectorAll("button[data-prev]").forEach(b => b.onclick = () => {
+      const s = skills.find(x => x.name === b.dataset.prev);
+      if (s) openModal(`${s.name}/SKILL.md`, `<pre class="skill">${esc(s.text)}</pre>`);
+    });
+    skills.forEach(validateInstalled);
   }
 
   // ---- wire buttons ----

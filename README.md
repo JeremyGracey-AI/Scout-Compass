@@ -140,12 +140,18 @@ What it does:
 - **Persona builder** — a plain-language form (name, title, org, charter, KPIs, partners,
   voice, plus optional support team / cadence / escalation). The server renders skills from
   the same Python templates the CLI uses, so output is identical.
+- **Skill picker & catalog** — choose which of the eight archetypes to generate from grouped,
+  described cards (each with example triggers and a *recurring* badge), with one-click presets
+  ("Daily driver," "Leadership review," …), Select all / Clear, and a *Browse archetypes*
+  catalog that explains the whole menu.
 - **Live preview** — each skill with its validation errors/warnings, plus the derived
   automations.
 - **One-click install** — uses the browser **File System Access API** to write
   `<slug>/SKILL.md` (and `automations/`) straight into the Scout skills folder you pick. The
   server never touches your local files.
-- **Manage installed skills** — list and remove skills already in that folder.
+- **Manage installed skills** — browse the skills already in that folder, grouped by
+  executive, each showing its description and a live validation status (valid / warnings /
+  errors); preview a `SKILL.md` in place, or remove it.
 - **Zip fallback** — browsers without the File System Access API (Safari, Firefox) get a
   `.zip` to unzip into `~/.copilot/skills/`.
 - **Export persona** — download what you built as a ready-to-commit `personas/<id>.yaml`

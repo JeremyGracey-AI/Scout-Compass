@@ -58,6 +58,68 @@ import automations  # noqa: E402
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+# Presentation metadata for the skills picker + catalog (web only; the generator
+# in cli/ stays the source of truth for how each archetype renders). Any archetype
+# not listed here still works — index() falls back to label-only, category "Other".
+WORKFLOW_META = {
+    "briefing": {
+        "blurb": "One-page exec brief — KPI table, who's in the room, talking points.",
+        "triggers": ["brief me on", "prep me for", "give me a pre-read on"],
+        "recurring": False, "category": "Prep & brief",
+    },
+    "meeting-prep": {
+        "blurb": "Run-of-show for a specific meeting — agenda, attendees, decisions to land.",
+        "triggers": ["prep me for my meeting with", "build an agenda for", "run of show for"],
+        "recurring": False, "category": "Prep & brief",
+    },
+    "one-on-one": {
+        "blurb": "1:1 prep card — since last time, follow-ups both ways, one growth note.",
+        "triggers": ["prep for my 1:1 with", "follow-ups from my last 1:1 with"],
+        "recurring": True, "category": "Prep & brief",
+    },
+    "comms": {
+        "blurb": "Audience-mode draft with three subject lines and risk flags.",
+        "triggers": ["draft", "reply to", "send a note to"],
+        "recurring": False, "category": "Communicate",
+    },
+    "triage": {
+        "blurb": "Daily/weekly digest — top-of-mind, compliance flags, KPI exceptions, delegations.",
+        "triggers": ["morning digest", "what needs me today", "triage my inbox"],
+        "recurring": True, "category": "Operate",
+    },
+    "decisions-log": {
+        "blurb": "Durable decision record — the call, options, owner, follow-ups, review date.",
+        "triggers": ["log this decision", "record what we decided", "what did we decide about"],
+        "recurring": False, "category": "Operate",
+    },
+    "strategy": {
+        "blurb": "Two-to-four page memo — recommendation, options table, sequencing, open questions.",
+        "triggers": ["analyze", "build the case for", "strategic view on"],
+        "recurring": False, "category": "Decide & review",
+    },
+    "review-prep": {
+        "blurb": "MBR/QBR pack — KPI scorecard, narrative, wins, risks with recovery owners.",
+        "triggers": ["prep my QBR", "build my monthly business review", "pull my KPI scorecard"],
+        "recurring": True, "category": "Decide & review",
+    },
+}
+
+# One-click presets: a named bundle of archetypes for a common executive mode.
+WORKFLOW_PRESETS = [
+    {"id": "daily", "label": "Daily driver",
+     "description": "Everyday cockpit: triage, briefings, and 1:1 prep.",
+     "workflows": ["triage", "briefing", "one-on-one"]},
+    {"id": "meetings", "label": "Meetings & decisions",
+     "description": "Walk in ready, walk out with the decision logged.",
+     "workflows": ["meeting-prep", "one-on-one", "decisions-log"]},
+    {"id": "review", "label": "Leadership review",
+     "description": "Business reviews and the strategy + decisions behind them.",
+     "workflows": ["review-prep", "strategy", "decisions-log"]},
+    {"id": "all", "label": "The works",
+     "description": "All eight archetypes.",
+     "workflows": list(WORKFLOWS.keys())},
+]
+
 
 def _persona_summary(path: Path) -> dict:
     p = load_persona(path)
@@ -73,13 +135,22 @@ def _persona_summary(path: Path) -> dict:
 @app.route("/")
 def index():
     personas = [_persona_summary(p) for p in sorted(PERSONAS_DIR.glob("*.yaml"))]
-    workflows = [
-        {"id": k, "label": v["title_suffix"]} for k, v in WORKFLOWS.items()
-    ]
+    workflows = []
+    for k, v in WORKFLOWS.items():
+        meta = WORKFLOW_META.get(k, {})
+        workflows.append({
+            "id": k,
+            "label": v["title_suffix"],
+            "blurb": meta.get("blurb", ""),
+            "triggers": meta.get("triggers", []),
+            "recurring": meta.get("recurring", False),
+            "category": meta.get("category", "Other"),
+        })
     return render_template(
         "index.html",
         personas=personas,
         workflows=workflows,
+        presets=WORKFLOW_PRESETS,
         supabase_url=SUPABASE_URL,
         supabase_key=SUPABASE_ANON_KEY,
     )
@@ -88,6 +159,16 @@ def index():
 @app.route("/api/personas")
 def api_personas():
     return jsonify([_persona_summary(p) for p in sorted(PERSONAS_DIR.glob("*.yaml"))])
+
+
+@app.route("/api/validate", methods=["POST"])
+def api_validate():
+    """Validate a SKILL.md body — used by the installed-skills manager for status."""
+    data = request.get_json(force=True)
+    content = data.get("content", "") or ""
+    slug = data.get("slug") or None
+    report = validate_skill_md(content, expected_slug=slug)
+    return jsonify({"valid": report.ok, "errors": report.errors, "warnings": report.warnings})
 
 
 def _render_batch(persona_file: str, workflows: list[str], prefix: str | None) -> list[dict]:

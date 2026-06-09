@@ -372,3 +372,27 @@ def test_web_app_persona_yaml_export():
     # An invalid persona is rejected, not silently exported.
     bad = client.post("/api/persona-yaml", json={"persona_data": {"display_name": "X"}})
     assert bad.status_code == 400
+
+
+def test_web_app_validate_endpoint():
+    pytest.importorskip("flask")
+    import sys
+    from pathlib import Path
+
+    web_dir = Path(sf.__file__).resolve().parent.parent / "web"
+    sys.path.insert(0, str(web_dir))
+    import app as web  # noqa: web/app.py
+    client = web.app.test_client()
+
+    # A cleanly generated skill validates with no errors or warnings.
+    persona = sf.persona_from_data(_base_persona_dict())
+    slug = "dana-briefing"
+    content = sf.render_skill(workflow="briefing", persona=persona, slug=slug)
+    r = client.post("/api/validate", json={"content": content, "slug": slug})
+    assert r.status_code == 200
+    rep = r.get_json()
+    assert rep["valid"] and rep["errors"] == []
+
+    # A junk body is reported invalid, not accepted.
+    bad = client.post("/api/validate", json={"content": "no frontmatter", "slug": "x"})
+    assert bad.get_json()["valid"] is False
