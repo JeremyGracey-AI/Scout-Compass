@@ -20,7 +20,8 @@ import sys
 import zipfile
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request, send_file
+import yaml
+from flask import Flask, Response, jsonify, render_template, request, send_file
 
 # Make CLI module importable.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -57,6 +58,68 @@ import automations  # noqa: E402
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
+# Presentation metadata for the skills picker + catalog (web only; the generator
+# in cli/ stays the source of truth for how each archetype renders). Any archetype
+# not listed here still works — index() falls back to label-only, category "Other".
+WORKFLOW_META = {
+    "briefing": {
+        "blurb": "One-page exec brief — KPI table, who's in the room, talking points.",
+        "triggers": ["brief me on", "prep me for", "give me a pre-read on"],
+        "recurring": False, "category": "Prep & brief",
+    },
+    "meeting-prep": {
+        "blurb": "Run-of-show for a specific meeting — agenda, attendees, decisions to land.",
+        "triggers": ["prep me for my meeting with", "build an agenda for", "run of show for"],
+        "recurring": False, "category": "Prep & brief",
+    },
+    "one-on-one": {
+        "blurb": "1:1 prep card — since last time, follow-ups both ways, one growth note.",
+        "triggers": ["prep for my 1:1 with", "follow-ups from my last 1:1 with"],
+        "recurring": True, "category": "Prep & brief",
+    },
+    "comms": {
+        "blurb": "Audience-mode draft with three subject lines and risk flags.",
+        "triggers": ["draft", "reply to", "send a note to"],
+        "recurring": False, "category": "Communicate",
+    },
+    "triage": {
+        "blurb": "Daily/weekly digest — top-of-mind, compliance flags, KPI exceptions, delegations.",
+        "triggers": ["morning digest", "what needs me today", "triage my inbox"],
+        "recurring": True, "category": "Operate",
+    },
+    "decisions-log": {
+        "blurb": "Durable decision record — the call, options, owner, follow-ups, review date.",
+        "triggers": ["log this decision", "record what we decided", "what did we decide about"],
+        "recurring": False, "category": "Operate",
+    },
+    "strategy": {
+        "blurb": "Two-to-four page memo — recommendation, options table, sequencing, open questions.",
+        "triggers": ["analyze", "build the case for", "strategic view on"],
+        "recurring": False, "category": "Decide & review",
+    },
+    "review-prep": {
+        "blurb": "MBR/QBR pack — KPI scorecard, narrative, wins, risks with recovery owners.",
+        "triggers": ["prep my QBR", "build my monthly business review", "pull my KPI scorecard"],
+        "recurring": True, "category": "Decide & review",
+    },
+}
+
+# One-click presets: a named bundle of archetypes for a common executive mode.
+WORKFLOW_PRESETS = [
+    {"id": "daily", "label": "Daily driver",
+     "description": "Everyday cockpit: triage, briefings, and 1:1 prep.",
+     "workflows": ["triage", "briefing", "one-on-one"]},
+    {"id": "meetings", "label": "Meetings & decisions",
+     "description": "Walk in ready, walk out with the decision logged.",
+     "workflows": ["meeting-prep", "one-on-one", "decisions-log"]},
+    {"id": "review", "label": "Leadership review",
+     "description": "Business reviews and the strategy + decisions behind them.",
+     "workflows": ["review-prep", "strategy", "decisions-log"]},
+    {"id": "all", "label": "The works",
+     "description": "All eight archetypes.",
+     "workflows": list(WORKFLOWS.keys())},
+]
+
 
 def _persona_summary(path: Path) -> dict:
     p = load_persona(path)
@@ -72,13 +135,22 @@ def _persona_summary(path: Path) -> dict:
 @app.route("/")
 def index():
     personas = [_persona_summary(p) for p in sorted(PERSONAS_DIR.glob("*.yaml"))]
-    workflows = [
-        {"id": k, "label": v["title_suffix"]} for k, v in WORKFLOWS.items()
-    ]
+    workflows = []
+    for k, v in WORKFLOWS.items():
+        meta = WORKFLOW_META.get(k, {})
+        workflows.append({
+            "id": k,
+            "label": v["title_suffix"],
+            "blurb": meta.get("blurb", ""),
+            "triggers": meta.get("triggers", []),
+            "recurring": meta.get("recurring", False),
+            "category": meta.get("category", "Other"),
+        })
     return render_template(
         "index.html",
         personas=personas,
         workflows=workflows,
+        presets=WORKFLOW_PRESETS,
         supabase_url=SUPABASE_URL,
         supabase_key=SUPABASE_ANON_KEY,
     )
@@ -87,6 +159,16 @@ def index():
 @app.route("/api/personas")
 def api_personas():
     return jsonify([_persona_summary(p) for p in sorted(PERSONAS_DIR.glob("*.yaml"))])
+
+
+@app.route("/api/validate", methods=["POST"])
+def api_validate():
+    """Validate a SKILL.md body — used by the installed-skills manager for status."""
+    data = request.get_json(force=True)
+    content = data.get("content", "") or ""
+    slug = data.get("slug") or None
+    report = validate_skill_md(content, expected_slug=slug)
+    return jsonify({"valid": report.ok, "errors": report.errors, "warnings": report.warnings})
 
 
 def _render_batch(persona_file: str, workflows: list[str], prefix: str | None) -> list[dict]:
@@ -277,6 +359,84 @@ def api_download():
     return send_file(
         buf, mimetype="application/zip", as_attachment=True,
         download_name=f"{name}-scout-skills.zip",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Persona export: download what the builder produced (or a saved persona) as a
+# ready-to-commit personas/<id>.yaml. Stateless — validates and serializes, but
+# stores nothing, so a browser-built executive can be seeded into the repo.
+# --------------------------------------------------------------------------- #
+def _prune_empty(value):
+    """Drop empty strings / lists / dicts so the exported YAML stays tidy.
+
+    Run only after persona validation, which guarantees the required fields are
+    present and non-empty — so they are never pruned.
+    """
+    if isinstance(value, dict):
+        cleaned = {}
+        for key, item in value.items():
+            pruned = _prune_empty(item)
+            if pruned not in ("", [], {}, None):
+                cleaned[key] = pruned
+        return cleaned
+    if isinstance(value, list):
+        kept = (_prune_empty(item) for item in value)
+        return [item for item in kept if item not in ("", [], {}, None)]
+    return value
+
+
+def _persona_yaml_text(raw: dict) -> str:
+    """Serialize a (validated) persona mapping to commit-ready YAML with a header."""
+    key_order = (
+        "id", "display_name", "title", "org", "charter", "scope", "priorities",
+        "voice_and_style", "decision_filters", "people", "delegates", "cadence",
+        "escalation_rules", "automations", "provenance",
+    )
+    ordered = {k: raw[k] for k in key_order if k in raw}
+    ordered.update({k: v for k, v in raw.items() if k not in ordered})  # keep any extras
+    body = yaml.safe_dump(_prune_empty(ordered), sort_keys=False, allow_unicode=True)
+    return (
+        f"# Persona: {raw.get('display_name', 'Untitled')}\n"
+        "# Generated by the Scout Compass builder. Edit freely, save under personas/,\n"
+        "# then run: python cli/compass.py --persona personas/<this-file>.yaml\n"
+        f"{body}"
+    )
+
+
+@app.route("/api/persona-yaml", methods=["POST"])
+def api_persona_yaml():
+    """Export the current persona as a downloadable personas/<id>.yaml file.
+
+    A built (inline ``persona_data``) persona is validated, then emitted as YAML
+    that ``load_persona`` can read back. A saved persona is returned verbatim so
+    its curation and comments are preserved.
+    """
+    data = request.get_json(force=True)
+    inline = data.get("persona_data")
+    if inline:
+        try:
+            persona = persona_from_data(inline, source="form")
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        filename = f"{automations.slugify(persona.id)}.yaml"
+        return Response(
+            _persona_yaml_text(inline),
+            mimetype="application/x-yaml",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
+    persona_file = data.get("persona")
+    if not persona_file:
+        return jsonify({"error": "Provide persona fields or choose a saved persona."}), 400
+    # Saved persona: return the curated file as-is, guarded against path traversal.
+    path = (PERSONAS_DIR / persona_file).resolve()
+    if path.parent != PERSONAS_DIR.resolve() or path.suffix != ".yaml" or not path.exists():
+        return jsonify({"error": "Unknown saved persona."}), 400
+    return Response(
+        path.read_text(encoding="utf-8"),
+        mimetype="application/x-yaml",
+        headers={"Content-Disposition": f'attachment; filename="{path.name}"'},
     )
 
 

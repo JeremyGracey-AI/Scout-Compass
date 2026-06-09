@@ -347,3 +347,52 @@ def test_web_app_inline_generate():
 
     bad = client.post("/api/generate", json={"persona_data": {"display_name": "X"}, "workflows": ["briefing"]})
     assert bad.status_code == 400
+
+
+def test_web_app_persona_yaml_export():
+    pytest.importorskip("flask")
+    import sys
+    from pathlib import Path
+    import yaml as _yaml
+
+    web_dir = Path(sf.__file__).resolve().parent.parent / "web"
+    sys.path.insert(0, str(web_dir))
+    import app as web  # noqa: web/app.py
+    client = web.app.test_client()
+
+    # A built (inline) persona exports as YAML that round-trips back into a Persona.
+    r = client.post("/api/persona-yaml", json={"persona_data": _base_persona_dict()})
+    assert r.status_code == 200
+    assert "attachment" in r.headers.get("Content-Disposition", "")
+    text = r.get_data(as_text=True)
+    persona = sf.persona_from_data(_yaml.safe_load(text))  # raises if the export is invalid
+    assert persona.display_name == "Dana Lin"
+    assert "decision_filters" in text
+
+    # An invalid persona is rejected, not silently exported.
+    bad = client.post("/api/persona-yaml", json={"persona_data": {"display_name": "X"}})
+    assert bad.status_code == 400
+
+
+def test_web_app_validate_endpoint():
+    pytest.importorskip("flask")
+    import sys
+    from pathlib import Path
+
+    web_dir = Path(sf.__file__).resolve().parent.parent / "web"
+    sys.path.insert(0, str(web_dir))
+    import app as web  # noqa: web/app.py
+    client = web.app.test_client()
+
+    # A cleanly generated skill validates with no errors or warnings.
+    persona = sf.persona_from_data(_base_persona_dict())
+    slug = "dana-briefing"
+    content = sf.render_skill(workflow="briefing", persona=persona, slug=slug)
+    r = client.post("/api/validate", json={"content": content, "slug": slug})
+    assert r.status_code == 200
+    rep = r.get_json()
+    assert rep["valid"] and rep["errors"] == []
+
+    # A junk body is reported invalid, not accepted.
+    bad = client.post("/api/validate", json={"content": "no frontmatter", "slug": "x"})
+    assert bad.get_json()["valid"] is False
