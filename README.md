@@ -67,7 +67,7 @@ No restart needed — Scout picks them up at the start of the next conversation.
 cp -r meta_skill/compass ~/.copilot/skills/
 ```
 
-Then ask Scout: *"Make a new comms skill for Morgan Reyes — he needs help drafting board-up updates on the partner lifecycle KPIs."* The meta-skill walks Scout through gathering the right persona context and producing a validated SKILL.md.
+Then ask Scout: *"Make a new comms skill for Morgan Reyes — he needs help drafting board-up updates on the partner lifecycle KPIs."* The meta-skill walks Scout through gathering the right persona inputs and renders a polished `SKILL.md`.
 
 ## Repo layout
 
@@ -102,7 +102,7 @@ scout-compass/
 Per the [Microsoft Scout docs](https://learn.microsoft.com/en-us/microsoft-scout/use-microsoft-scout#create-a-custom-skill):
 
 - The **skill name is the folder name** (e.g. `morgan-briefing/`), lowercase-hyphen.
-- YAML frontmatter delimited by `---`. The **only required field is `description`** (what the skill does + when to use it). The generator also emits an explicit `name` for portability with the broader Agent Skills spec and validates that it matches the folder — but Scout itself does not require it.
+- YAML frontmatter delimited by `---`. The **only required field is `description`** (what the skill does + when to use it). The generator also emits an explicit `name` for portability with the browser installer.
 - Markdown body with the skill instructions. Up to ~1 MB. Keep it lean — Scout loads the whole body when the skill activates.
 - Drop the folder into `~/.copilot/skills/<slug>/` (or `~/.copilot/m-skills/<slug>/` to sync across devices). Auto-discovered at the start of each conversation.
 
@@ -190,4 +190,4 @@ sections.
 
 ## License
 
-Internal use. Adapt freely.
+MIT. See `LICENSE` for details.
