@@ -43,7 +43,7 @@ Before writing, gather signals in this order. Stop as soon as you have enough to
 
 1. **Internal Microsoft 365 context** (use Scout's M365 tools):
    - Start with **WorkIQ** for the cross-service sweep: "everything on \<topic / person\> across mail, Teams, and documents," then drill in with the `m365_*` tools.
-   - `m365_*` mail + Teams: recent threads and channel posts in Operations, Engineering, Finance, Partner Program referencing the topic.
+   - `m365_*` mail + Teams: recent threads and channel posts across {{ persona.first_name }}'s partner orgs (Sales, Finance, Engineering) referencing the topic.
    - `m365_*` OneDrive/SharePoint: decks, dashboards, or memos on the topic.
    - `m365_*` calendar: prior meetings on this topic, attendees, decisions logged.
    - **People search:** resolve each named attendee's title, org, and reporting line before listing them in "Who's in the room."

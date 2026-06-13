@@ -1,0 +1,110 @@
+# Persona: Morgan Reyes (FICTIONAL)
+# Not based on any real individual. Created for demos and tests.
+# This file seeds skill templates with persona-grounded context.
+
+id: morgan-reyes
+display_name: Morgan Reyes
+title: General Manager, Operations Enablement
+org: Contoso Ltd.
+location: Austin, Texas
+tenure_years: 18
+reports_into:
+  - Corporate Vice President, Business Operations
+  - C-Suite (via operations & compliance reporting)
+
+charter: |
+  Lead Operations Enablement, driving continuous improvement, product
+  management, data/reporting, and AI capabilities across quote-to-cash,
+  product/program launch, and partner lifecycle processes. Embed KPI-driven
+  continuous improvement and AI to improve revenue velocity, operational
+  quality, speed, and compliance at scale.
+
+scope:
+  process_domains:
+    - Quote-to-cash (Q2C)
+    - Product and program launch
+    - Partner lifecycle
+    - Commerce billing and payments
+    - Financial controls, trade, tax, and privacy compliance
+  partner_orgs:
+    - Sales
+    - Finance
+    - Operations
+    - Engineering
+    - Legal
+    - Risk
+    - Marketing (product launches)
+
+priorities:
+  - Embed AI into operational and compliance workflows at scale
+  - KPI-driven continuous improvement (revenue velocity, quality, speed, compliance)
+  - Product management discipline applied to internal operations
+  - Data and reporting maturity (from static reports to interactive insights)
+  - Talent development and inclusive leadership
+
+voice_and_style:
+  tone: Executive, calm, KPI-anchored, partnership-oriented
+  signature_phrases:
+    - "KPI-driven continuous improvement"
+    - "revenue velocity, quality, speed, and compliance"
+    - "at scale"
+    - "embed AI"
+    - "quote-to-cash"
+    - "partner lifecycle"
+  framing_pattern: |
+    Lead with the business outcome (revenue, compliance, speed), then the
+    operational lever (process, data, AI), then the cross-functional partners,
+    then the metric or KPI that proves it worked.
+  avoid:
+    - Jargon without a business outcome attached
+    - Vague AI claims with no compliance/control story
+    - Recommendations that bypass Finance, Legal, or Risk partners
+
+background_strengths:
+  - Financial controls and audit readiness
+  - Large-scale finance and operations transformations
+  - Revenue reporting platforms
+  - Process automation (low-code + ML)
+  - Cross-org alignment from individual contributors to executive leadership
+
+decision_filters:
+  - Does this measurably move a KPI? Which one?
+  - Does it strengthen or weaken a compliance control?
+  - Which partner orgs (Sales/Finance/Eng/Legal/Risk) need to be in the room?
+  - Does it scale, or is it a point solution?
+  - What is the AI/automation leverage vs. headcount-only fix?
+
+interests_outside_work:
+  - Mentoring and talent development
+  - Process-improvement community
+  - Endurance cycling
+
+public_signals_to_monitor:
+  - Company operations and org announcements
+  - Industry commerce/partner-program changes
+  - Quarterly earnings (cloud consumption, partner ecosystem)
+
+people:
+  chief_of_staff: ""
+  executive_assistant: ""
+  direct_reports: []
+  key_stakeholders: []
+
+delegates: []
+
+cadence:
+  timezone: "Central (CT) — Austin, TX"
+  working_hours: ""
+  focus_preferences:
+    - Protect mornings for deep work; cluster partner-org syncs in the afternoon
+    - Keep recurring status meetings time-boxed to 25 minutes
+  recurring_meetings: []
+
+escalation_rules:
+  - Compliance or control items escalate immediately — never queue.
+  - An ask from a partner-org leader gets a time-boxed response within one business day.
+  - A KPI threshold breach in quote-to-cash or partner lifecycle surfaces the same day, with the number.
+
+provenance:
+  source: "Fictional persona for demos and tests. Not based on any real individual; any resemblance is coincidental."
+  note: "Replace with your own persona by copying this file and editing the fields."

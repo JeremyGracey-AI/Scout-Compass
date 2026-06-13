@@ -41,7 +41,7 @@ Before writing the skill, gather and confirm:
 | Org and reporting line | Ask user; verify against public sources | yes |
 | Charter (1–3 sentences) | Ask user, or paraphrase from their LinkedIn "About" / role description | yes |
 | Process domains they own | Ask user; cross-check with org charter | yes |
-| Partner orgs they work with | Ask user; common Microsoft pairs: Sales, Finance, Engineering, Legal, Risk, Partner Program, Operations, Engineering | yes |
+| Partner orgs they work with | Ask user; common pairs: Sales, Finance, Engineering, Legal, Risk, Operations, Marketing | yes |
 | KPIs / metrics that define success | Ask user; if unknown, mark "TBD — confirm with exec or chief of staff" | yes |
 | Compliance touchpoints | Ask user; flag if SOX, Trade, Tax, Privacy, Anticorruption, Payments apply | yes |
 | Voice / tone preferences | Observe from their public posts (LinkedIn, blog) or ask user for 1–2 sample sentences | preferred |

@@ -132,7 +132,7 @@ def test_no_scout_tool_warns():
 
 def test_slug_regex():
     assert sf.SLUG_RE.match("morgan-briefing")
-    assert not sf.SLUG_RE.match("Morgan")        # uppercase
+    assert not sf.SLUG_RE.match("Morgan")      # uppercase
     assert not sf.SLUG_RE.match("ab")          # too short
     assert not sf.SLUG_RE.match("-lead")       # leading hyphen
 
@@ -145,7 +145,7 @@ def _full_persona() -> dict:
         "id": "x",
         "display_name": "Jane Doe",
         "title": "GM",
-        "org": "Operations",
+        "org": "Contoso Ltd.",
         "charter": "Lead things.",
         "scope": {"process_domains": ["Q2C"], "partner_orgs": ["Finance"]},
         "voice_and_style": {"tone": "calm", "signature_phrases": ["at scale"]},
@@ -169,7 +169,7 @@ def test_validate_persona_rejects_nonmapping():
     assert sf.validate_persona(None)
 
 
-def test_load_real_morgan_persona():
+def test_load_seed_persona():
     path = sf.PERSONAS_DIR / "morgan_reyes.yaml"
     if not path.exists():
         pytest.skip("Morgan persona not present")

@@ -25,7 +25,7 @@ All three share the same eight executive workflow archetypes:
 
 ## Seeded persona
 
-The repo ships with one persona — **Morgan Reyes**, General Manager, Operations Enablement (Business Operations) — assembled from his [public LinkedIn profile](https://www.linkedin.com/in/morganreyes). Charter, process domains, partner orgs, signature phrasing, and decision filters are all sourced.
+The repo ships with one persona — **Morgan Reyes**, General Manager, Operations Enablement (Contoso Ltd.) — a fully fictional executive created for demos and tests. Charter, process domains, partner orgs, signature phrasing, and decision filters are all defined in `personas/morgan_reyes.yaml`.
 
 Add more personas by dropping new YAML files into `personas/` matching the same shape.
 
@@ -67,7 +67,7 @@ No restart needed — Scout picks them up at the start of the next conversation.
 cp -r meta_skill/compass ~/.copilot/skills/
 ```
 
-Then ask Scout: *"Make a new comms skill for Morgan Reyes — he needs help drafting board-up updates on the partner lifecycle KPIs."* The meta-skill walks Scout through gathering the right persona inputs and renders a polished `SKILL.md`.
+Then ask Scout: *"Make a new comms skill for Morgan Reyes — they need help drafting board-up updates on the partner lifecycle KPIs."* The meta-skill walks Scout through gathering the right persona inputs and renders a polished `SKILL.md`.
 
 ## Repo layout
 
@@ -82,7 +82,7 @@ scout-compass/
 │   └── compass/
 │       └── SKILL.md            # the skill that teaches Scout to author exec skills
 ├── personas/
-│   └── morgan_reyes.yaml      # seed persona
+│   └── morgan_reyes.yaml       # seed persona (fictional)
 ├── templates/
 │   ├── briefing.md.j2          # Jinja2 templates — one per archetype
 │   ├── comms.md.j2
@@ -92,10 +92,10 @@ scout-compass/
 │   ├── decisions-log.md.j2
 │   ├── one-on-one.md.j2
 │   └── review-prep.md.j2
-├── examples/
-│   └── morgan/                   # snapshot of generated skills for reference
 └── README.md
 ```
+
+Example skills aren't checked in — generate them by running the CLI against the seeded persona (`personas/morgan_reyes.yaml`).
 
 ## SKILL.md spec used here
 
@@ -112,7 +112,7 @@ The generator's validator (`--validate <path>`) enforces these rules.
 
 - **Every generated skill names the exec by first name throughout.** Generic "the user" wording is the #1 tell of a low-effort skill — Scout loses persona grounding the moment it slips.
 - **Compliance posture is required, even if "no material exposure."** Microsoft execs operate under SOX and adjacent controls; ignoring compliance is the second-biggest tell.
-- **Partner orgs are listed by name.** Microsoft work is cross-functional — Sales, Finance, Engineering, Legal, Risk, Partner Program, Operations, Engineering. Skills that say "the team" instead activate weakly.
+- **Partner orgs are listed by name.** Enterprise ops work is cross-functional — Sales, Finance, Engineering, Legal, Risk, Operations, Marketing. Skills that say "the team" instead activate weakly.
 - **Self-check checklists in every skill.** Each generated SKILL.md ends with a checklist the skill runs against its own output before delivering. This is the single highest-leverage quality lever.
 - **No fabricated KPIs or quotes.** The templates explicitly forbid invented numbers and require inline citations.
 
