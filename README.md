@@ -2,6 +2,11 @@
 
 > Navigate from idea to installed skill with a smooth build, preview, and install flow.
 
+> **Note:** The Agents League @ AI Skills Fest 2026 hackathon entry is
+> **[scout-compass-mcp](https://github.com/JeremyGracey-AI/scout-compass-mcp)**
+> (governed agent memory — the run-time half of the lifecycle). This repository
+> is the companion skill-authoring tool.
+
 A toolkit for authoring **Microsoft Scout** `SKILL.md` files tuned to senior Microsoft executives.
 
 It ships three ways to create skills:
